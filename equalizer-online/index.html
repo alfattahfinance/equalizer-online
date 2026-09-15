@@ -912,40 +912,341 @@ function createEqualizer(channelIndex) {
     output: previousNode
   };
 }
+/* =========================================================
+   AUDIO ENGINE - WEB AUDIO API
+   2 CHANNEL x 31 BAND PARAMETRIC / PEAKING EQ
+   ========================================================= */
 
-function connectAudioSource(source) {
-  createAudioContext();
+let audioContext = null;
+let microphoneStream = null;
 
-  if (sourceNode) {
-    try {
-      sourceNode.disconnect();
-    } catch (error) {}
+let activeSource = null;
+let audioElementSource = null;
+let selectedAudioUrl = null;
+
+let splitterNode = null;
+let mergerNode = null;
+let masterGainNode = null;
+
+let audioRunning = false;
+let meterAnimationId = null;
+
+const audioFile = document.getElementById("audioFile");
+const audioPlayer = document.getElementById("audioPlayer");
+const audioStatus = document.getElementById("audioStatus");
+
+const startMicButton = document.getElementById("startMicButton");
+const startAudioButton = document.getElementById("startAudioButton");
+const stopAudioButton = document.getElementById("stopAudioButton");
+
+const audioChannels = [
+  {
+    inputGain: null,
+    highPass: null,
+    filters: [],
+    analyser: null,
+    bypass: false
+  },
+  {
+    inputGain: null,
+    highPass: null,
+    filters: [],
+    analyser: null,
+    bypass: false
+  }
+];
+
+function setAudioStatus(message) {
+  if (audioStatus) {
+    audioStatus.textContent = message;
+  }
+}
+
+function createAudioContext() {
+  if (!audioContext) {
+    const AudioContextClass =
+      window.AudioContext || window.webkitAudioContext;
+
+    if (!AudioContextClass) {
+      throw new Error("Web Audio API tidak didukung browser ini.");
+    }
+
+    audioContext = new AudioContextClass();
   }
 
-  const equalizer1 = createEqualizer(0);
-  const equalizer2 = createEqualizer(1);
+  if (audioContext.state === "suspended") {
+    audioContext.resume();
+  }
 
-  const splitter = audioContext.createChannelSplitter(2);
-  const merger = audioContext.createChannelMerger(2);
+  return audioContext;
+}
+
+/* ---------------------------------------------------------
+   MEMBUAT SATU RANGKAIAN EQ UNTUK SETIAP CHANNEL
+   --------------------------------------------------------- */
+
+function buildEqualizerChannel(channelIndex) {
+  const channel = channels[channelIndex];
+
+  const gainControl = channel.querySelector(".gain");
+  const hpfControl = channel.querySelector(".hpf");
+  const bypassButton = channel.querySelector(".bypass-button");
+
+  const bandControls = [
+    ...channel.querySelectorAll(".band input[type='range']")
+  ];
+
+  const inputGain = audioContext.createGain();
+  const highPass = audioContext.createBiquadFilter();
+  const analyser = audioContext.createAnalyser();
+
+  inputGain.gain.value =
+    Math.pow(10, Number(gainControl.value) / 20);
+
+  highPass.type = "highpass";
+  highPass.frequency.value =
+    hpfControl.value === "off"
+      ? 20
+      : Number(hpfControl.value);
+
+  highPass.Q.value = 0.707;
+
+  analyser.fftSize = 1024;
+  analyser.smoothingTimeConstant = 0.75;
+
+  inputGain.connect(highPass);
+
+  let previousNode = highPass;
+  const filters = [];
+
+  bandControls.forEach((control, index) => {
+    const filter = audioContext.createBiquadFilter();
+
+    filter.type = "peaking";
+    filter.frequency.value = frequencies[index];
+    filter.Q.value = 1.4;
+    filter.gain.value = Number(control.value);
+
+    previousNode.connect(filter);
+    previousNode = filter;
+
+    filters.push(filter);
+  });
+
+  previousNode.connect(analyser);
+
+  audioChannels[channelIndex] = {
+    inputGain,
+    highPass,
+    filters,
+    analyser,
+    bypass: bypassButton.classList.contains("active")
+  };
+
+  /* Gain input */
+  gainControl.addEventListener("input", () => {
+    const gainDb = Number(gainControl.value);
+
+    inputGain.gain.setTargetAtTime(
+      Math.pow(10, gainDb / 20),
+      audioContext.currentTime,
+      0.01
+    );
+  });
+
+  /* HPF */
+  hpfControl.addEventListener("change", () => {
+    const frequency =
+      hpfControl.value === "off"
+        ? 20
+        : Number(hpfControl.value);
+
+    highPass.frequency.setTargetAtTime(
+      frequency,
+      audioContext.currentTime,
+      0.01
+    );
+  });
+
+  /* Semua band EQ */
+  bandControls.forEach((control, index) => {
+    control.addEventListener("input", () => {
+      if (audioChannels[channelIndex].bypass) {
+        return;
+      }
+
+      filters[index].gain.setTargetAtTime(
+        Number(control.value),
+        audioContext.currentTime,
+        0.01
+      );
+    });
+  });
+
+  /* Bypass */
+  bypassButton.addEventListener("click", () => {
+    const bypassed =
+      bypassButton.classList.contains("active");
+
+    audioChannels[channelIndex].bypass = bypassed;
+
+    filters.forEach((filter, index) => {
+      filter.gain.setTargetAtTime(
+        bypassed ? 0 : Number(bandControls[index].value),
+        audioContext.currentTime,
+        0.01
+      );
+    });
+  });
+
+  return audioChannels[channelIndex];
+}
+
+/* ---------------------------------------------------------
+   MEMBANGUN GRAPH EQ HANYA SEKALI
+   --------------------------------------------------------- */
+
+function initializeAudioGraph() {
+  createAudioContext();
+
+  if (audioChannels[0].inputGain && audioChannels[1].inputGain) {
+    return;
+  }
+
+  buildEqualizerChannel(0);
+  buildEqualizerChannel(1);
+
+  splitterNode = audioContext.createChannelSplitter(2);
+  mergerNode = audioContext.createChannelMerger(2);
 
   masterGainNode = audioContext.createGain();
   masterGainNode.gain.value = 0.8;
 
-  source.connect(splitter);
+  /*
+    Channel 1:
+    splitter output 0 -> EQ Channel 1 -> merger input 0
 
-  splitter.connect(equalizer1.inputGain, 0);
-  splitter.connect(equalizer2.inputGain, 1);
+    Channel 2:
+    splitter output 1 -> EQ Channel 2 -> merger input 1
+  */
 
-  equalizer1.output.connect(merger, 0, 0);
-  equalizer2.output.connect(merger, 0, 1);
+  splitterNode.connect(
+    audioChannels[0].inputGain,
+    0
+  );
 
-  merger.connect(masterGainNode);
+  splitterNode.connect(
+    audioChannels[1].inputGain,
+    1
+  );
+
+  audioChannels[0].analyser.connect(
+    mergerNode,
+    0,
+    0
+  );
+
+  audioChannels[1].analyser.connect(
+    mergerNode,
+    0,
+    1
+  );
+
+  mergerNode.connect(masterGainNode);
   masterGainNode.connect(audioContext.destination);
 
-  sourceNode = source;
-
-  setAudioStatus("Audio aktif. EQ Channel 1 dan Channel 2 sedang memproses suara.");
+  startRealMeters();
 }
+
+/* ---------------------------------------------------------
+   MEMUTUS SUMBER AUDIO SEBELUM MENGGANTI INPUT
+   --------------------------------------------------------- */
+
+function disconnectCurrentSource() {
+  if (activeSource) {
+    try {
+      activeSource.disconnect();
+    } catch (error) {
+      console.warn("Sumber audio sudah terputus.");
+    }
+
+    activeSource = null;
+  }
+
+  if (microphoneStream) {
+    microphoneStream.getTracks().forEach(track => {
+      track.stop();
+    });
+
+    microphoneStream = null;
+  }
+
+  audioRunning = false;
+}
+
+/* ---------------------------------------------------------
+   MENGHUBUNGKAN SUMBER AUDIO KE EQ
+   --------------------------------------------------------- */
+
+function connectAudioSource(source, sourceType) {
+  initializeAudioGraph();
+
+  disconnectCurrentSource();
+
+  activeSource = source;
+
+  /*
+    Sumber audio stereo:
+    L -> Channel 1
+    R -> Channel 2
+
+    Sumber audio mono:
+    L/mono -> Channel 1
+    L/mono -> Channel 2
+  */
+
+  const channelCount = source.channelCount || 2;
+
+  if (channelCount <= 1) {
+    source.connect(splitterNode);
+
+    /*
+      Pada sumber mono, salurkan channel 0 ke dua EQ.
+    */
+    splitterNode.connect(
+      audioChannels[0].inputGain,
+      0
+    );
+
+    splitterNode.connect(
+      audioChannels[1].inputGain,
+      0
+    );
+  } else {
+    source.connect(splitterNode);
+
+    splitterNode.connect(
+      audioChannels[0].inputGain,
+      0
+    );
+
+    splitterNode.connect(
+      audioChannels[1].inputGain,
+      1
+    );
+  }
+
+  audioRunning = true;
+
+  setAudioStatus(
+    sourceType +
+    " aktif. Audio diproses melalui EQ 31-band Channel 1 dan Channel 2."
+  );
+}
+
+/* ---------------------------------------------------------
+   INPUT FILE AUDIO
+   --------------------------------------------------------- */
 
 audioFile.addEventListener("change", event => {
   const file = event.target.files[0];
@@ -954,70 +1255,235 @@ audioFile.addEventListener("change", event => {
     return;
   }
 
-  createAudioContext();
-
-  if (audioElementSource) {
-    try {
-      audioElementSource.disconnect();
-    } catch (error) {}
-  }
-
-  audioPlayer.src = URL.createObjectURL(file);
-  audioPlayer.load();
-
-  audioElementSource =
-    audioContext.createMediaElementSource(audioPlayer);
-
-  connectAudioSource(audioElementSource);
-
-  setAudioStatus("File audio siap diputar.");
-});
-
-startAudioButton.addEventListener("click", async () => {
-  if (!audioPlayer.src) {
-    setAudioStatus("Pilih file audio terlebih dahulu.");
-    return;
-  }
-
-  createAudioContext();
-
   try {
-    await audioPlayer.play();
-    setAudioStatus("File audio sedang diputar melalui EQ.");
-  } catch (error) {
-    setAudioStatus("Pemutaran audio diblokir browser.");
-  }
-});
+    createAudioContext();
+    initializeAudioGraph();
 
-stopAudioButton.addEventListener("click", () => {
-  audioPlayer.pause();
-  setAudioStatus("Audio dihentikan.");
-});
+    /*
+      MediaElementSource hanya boleh dibuat sekali
+      untuk satu elemen audio.
+    */
+    if (!audioElementSource) {
+      audioElementSource =
+        audioContext.createMediaElementSource(audioPlayer);
+    }
 
-startMicButton.addEventListener("click", async () => {
-  createAudioContext();
+    if (selectedAudioUrl) {
+      URL.revokeObjectURL(selectedAudioUrl);
+    }
 
-  try {
-    microphoneStream = await navigator.mediaDevices.getUserMedia({
-      audio: {
-        echoCancellation: false,
-        noiseSuppression: false,
-        autoGainControl: false
-      }
-    });
+    selectedAudioUrl = URL.createObjectURL(file);
 
-    const microphoneSource =
-      audioContext.createMediaStreamSource(microphoneStream);
+    audioPlayer.pause();
+    audioPlayer.src = selectedAudioUrl;
+    audioPlayer.load();
 
-    connectAudioSource(microphoneSource);
+    connectAudioSource(
+      audioElementSource,
+      "File audio"
+    );
 
-    setAudioStatus("Mikrofon aktif. Suara diproses oleh EQ.");
-  } catch (error) {
     setAudioStatus(
-      "Mikrofon tidak dapat digunakan. Periksa izin mikrofon."
+      "File audio siap. Tekan START AUDIO untuk memutar."
+    );
+  } catch (error) {
+    console.error(error);
+
+    setAudioStatus(
+      "File audio gagal diproses oleh Web Audio API."
     );
   }
 });
+
+/* ---------------------------------------------------------
+   START FILE AUDIO
+   --------------------------------------------------------- */
+
+startAudioButton.addEventListener("click", async () => {
+  if (!audioPlayer.src) {
+    setAudioStatus(
+      "Pilih file audio terlebih dahulu."
+    );
+
+    return;
+  }
+
+  try {
+    createAudioContext();
+    initializeAudioGraph();
+
+    if (audioContext.state === "suspended") {
+      await audioContext.resume();
+    }
+
+    await audioPlayer.play();
+
+    audioRunning = true;
+
+    setAudioStatus(
+      "File audio sedang diputar melalui EQ dan output speaker/headset."
+    );
+  } catch (error) {
+    console.error(error);
+
+    setAudioStatus(
+      "Pemutaran audio gagal. Tekan tombol START AUDIO kembali."
+    );
+  }
+});
+
+/* ---------------------------------------------------------
+   INPUT MICROPHONE
+   --------------------------------------------------------- */
+
+startMicButton.addEventListener("click", async () => {
+  try {
+    createAudioContext();
+    initializeAudioGraph();
+
+    disconnectCurrentSource();
+
+    if (!navigator.mediaDevices ||
+        !navigator.mediaDevices.getUserMedia) {
+      setAudioStatus(
+        "Browser tidak mendukung akses mikrofon."
+      );
+
+      return;
+    }
+
+    microphoneStream =
+      await navigator.mediaDevices.getUserMedia({
+        audio: {
+          channelCount: 1,
+          echoCancellation: false,
+          noiseSuppression: false,
+          autoGainControl: false
+        }
+      });
+
+    const microphoneSource =
+      audioContext.createMediaStreamSource(
+        microphoneStream
+      );
+
+    connectAudioSource(
+      microphoneSource,
+      "Mikrofon"
+    );
+
+    setAudioStatus(
+      "Mikrofon aktif. Gunakan headset terlebih dahulu untuk mencegah feedback."
+    );
+  } catch (error) {
+    console.error(error);
+
+    setAudioStatus(
+      "Mikrofon tidak dapat digunakan. Periksa izin mikrofon dan gunakan HTTPS."
+    );
+  }
+});
+
+/* ---------------------------------------------------------
+   STOP AUDIO
+   --------------------------------------------------------- */
+
+stopAudioButton.addEventListener("click", () => {
+  if (audioPlayer) {
+    audioPlayer.pause();
+    audioPlayer.currentTime = 0;
+  }
+
+  disconnectCurrentSource();
+
+  setAudioStatus(
+    "Audio dihentikan. Input mikrofon dan file sudah diputus."
+  );
+});
+
+/* ---------------------------------------------------------
+   METER AUDIO NYATA DAN CLIP
+   --------------------------------------------------------- */
+
+function startRealMeters() {
+  if (meterAnimationId) {
+    return;
+  }
+
+  const meterBuffers = [
+    new Uint8Array(1024),
+    new Uint8Array(1024)
+  ];
+
+  function updateRealMeters() {
+    meterAnimationId =
+      requestAnimationFrame(updateRealMeters);
+
+    audioChannels.forEach((audioChannel, index) => {
+      const channel = channels[index];
+
+      if (!audioChannel.analyser) {
+        return;
+      }
+
+      const meter = channel.querySelector(".meter");
+      const clip = channel.querySelector(".clip");
+
+      const buffer = meterBuffers[index];
+
+      audioChannel.analyser.getByteTimeDomainData(buffer);
+
+      let peak = 0;
+
+      for (let i = 0; i < buffer.length; i++) {
+        const normalized =
+          Math.abs(buffer[i] - 128) / 128;
+
+        if (normalized > peak) {
+          peak = normalized;
+        }
+      }
+
+      const db =
+        peak > 0
+          ? 20 * Math.log10(peak)
+          : -60;
+
+      /*
+        Rentang meter:
+        -60 dB sampai 0 dB
+      */
+      const level = Math.max(
+        0,
+        Math.min(
+          10,
+          Math.round(((db + 60) / 60) * 10)
+        )
+      );
+
+      meter.innerHTML = "";
+
+      for (let i = 0; i < 10; i++) {
+        const segment = document.createElement("span");
+
+        if (i < level) {
+          segment.classList.add("on");
+        }
+
+        meter.appendChild(segment);
+      }
+
+      /*
+        Clip jika sinyal mendekati 0 dB.
+      */
+      const clipping = peak >= 0.98;
+
+      clip.classList.toggle("on", clipping);
+    });
+  }
+
+  updateRealMeters();
+}
   </script>
 </body>
 </html>
