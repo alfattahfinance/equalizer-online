@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Equalizer Online</title>
+
+  <style>
+    :root {
+      --bg: #101318;
+      --panel: #1a1f27;
+      --panel-2: #222934;
+      --border: #3a4350;
+      --text: #e8edf5;
+      --muted: #8e99a8;
+      --green: #22d879;
+      --yellow: #ffd34d;
+      --red: #ff4d61;
+      --blue: #4da3ff;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Arial, sans-serif;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 16px 20px;
+      background: #171b21;
+      border-bottom: 1px solid var(--border);
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    header span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 12px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    button,
+    select,
+    input {
+      font: inherit;
+    }
+
+    button,
+    select {
+      color: var(--text);
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 9px 12px;
+      cursor: pointer;
+    }
+
+    button:hover,
+    select:hover {
+      border-color: var(--blue);
+    }
+
+    button.active {
+      background: var(--blue);
+      color: #07111e;
+      border-color: var(--blue);
+    }
+
+    .mixer-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 190px;
+      gap: 12px;
+      padding: 14px;
+    }
+
+    .channels {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+      gap: 10px;
+      align-items: stretch;
+    }
+
+    .channel,
+    .master {
+      min-width: 0;
+      background: linear-gradient(#202631, #181d25);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    .channel-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .channel-title small {
+      color: var(--muted);
+      font-size: 10px;
+    }
+
+    .meter {
+      display: flex;
+      align-items: end;
+      justify-content: center;
+      gap: 3px;
+      height: 72px;
+      padding: 6px;
+      background: #0b0e12;
+      border: 1px solid #303744;
+      border-radius: 5px;
+    }
+
+    .meter span {
+      width: 7px;
+      height: 12px;
+      background: var(--green);
+      border-radius: 2px;
+      box-shadow: 0 0 5px rgba(34, 216, 121, 0.35);
+    }
+
+    .meter span:nth-last-child(-n + 3) {
+      background: var(--yellow);
+    }
+
+    .meter span:last-child {
+      background: var(--red);
+    }
+
+    .control-label {
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .control-label strong {
+      color: var(--text);
+      font-weight: normal;
+    }
+
+    .vertical-control {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 150px;
+    }
+
+    input[type="range"].vertical {
+      width: 145px;
+      height: 22px;
+      transform: rotate(-90deg);
+      accent-color: var(--green);
+      cursor: pointer;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--blue);
+      cursor: pointer;
+    }
+
+    .knob-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 5px;
+    }
+
+    .knob-box {
+      text-align: center;
+      min-width: 0;
+    }
+
+    .knob {
+      width: 40px;
+      height: 40px;
+      margin: 4px auto;
+      border-radius: 50%;
+      appearance: none;
+      background: conic-gradient(
+        var(--blue) var(--knob-value, 50%),
+        #343c48 0
+      );
+      border: 4px solid #11151b;
+      outline: 1px solid #4a5564;
+      cursor: pointer;
+    }
+
+    .knob::-webkit-slider-thumb {
+      appearance: none;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: white;
+      box-shadow: 0 0 0 2px #11151b;
+    }
+
+    .knob::-moz-range-thumb {
+      width: 8px;
+      height: 8px;
+      border: 0;
+      border-radius: 50%;
+      background: white;
+    }
+
+    .pan {
+      accent-color: var(--yellow);
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+
+    .mute.active {
+      background: var(--red);
+      color: white;
+    }
+
+    .solo.active {
+      background: var(--yellow);
+      color: #171717;
+    }
+
+    .channel-footer {
+      margin-top: auto;
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 10px;
+    }
+
+    .master {
+      background: linear-gradient(#252c37, #171c24);
+    }
+
+    .master h2 {
+      margin: 0;
+      font-size: 16px;
+      text-align: center;
+    }
+
+    .master .vertical-control {
+      height: 235px;
+    }
+
+    .master input[type="range"].vertical {
+      height: 220px;
+    }
+
+    .status {
+      padding: 10px 20px;
+      border-top: 1px solid var(--border);
+      background: #171b21;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    @media (max-width: 850px) {
+      .mixer-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .master {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        align-items: center;
+      }
+
+      .master h2 {
+        grid-column: 1 / -1;
+      }
+
+      .master .vertical-control {
+        height: 180px;
+      }
+
+      .master input[type="range"].vertical {
+        height: 170px;
+      }
+    }
+
+    @media (max-width: 420px) {
+      header {
+        padding: 12px;
+      }
+
+      .toolbar,
+      .status {
+        padding-left: 12px;
+        padding-right: 12px;
+      }
+
+      .mixer-layout {
+        padding: 8px;
+      }
+
+      .channels {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div>
+      <h1>Equalizer Online</h1>
+      <span>Digital Mixer & Equalizer</span>
+    </div>
+
+    <span id="connectionStatus">OFFLINE</span>
+  </header>
+
+  <div class="toolbar">
+    <label>
+      <select id="channelCount">
+        <option value="8">8 Channel</option>
+        <option value="16" selected>16 Channel</option>
+        <option value="24">24 Channel</option>
+        <option value="32">32 Channel</option>
+      </select>
+    </label>
+
+    <button id="addChannel">+ Tambah Channel</button>
+    <button id="saveSettings">Simpan Setting</button>
+    <button id="loadSettings">Muat Setting</button>
+    <button id="resetSettings">Reset</button>
+  </div>
+
+  <main class="mixer-layout">
+    <section id="channels" class="channels"></section>
+
+    <section class="master">
+      <h2>MASTER</h2>
+
+      <div>
+        <div class="control-label">
+          <span>MASTER FADER</span>
+          <strong id="masterValue">80%</strong>
+        </div>
+
+        <div class="vertical-control">
+          <input
+            id="masterFader"
+            class="vertical"
+            type="range"
+            min="0"
+            max="100"
+            value="80"
+          />
+        </div>
+      </div>
+
+      <div>
+        <div class="control-label">
+          <span>MASTER LEVEL</span>
+          <strong id="masterMeterValue">80%</strong>
+        </div>
+
+        <div class="meter" id="masterMeter">
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </div>
+
+      <div class="buttons">
+        <button id="masterMute">MUTE</button>
+        <button id="masterSolo">SOLO</button>
+      </div>
+    </section>
+  </main>
+
+  <div class="status" id="status">
+    Sistem siap. Belum terhubung ke ESP32.
+  </div>
+
+  <script>
+    const state = {
+      channelCount: 16,
+      master: 80,
+      masterMute: false,
+      masterSolo: false,
+      channels: []
+    };
+
+    const channelsElement = document.getElementById("channels");
+    const statusElement = document.getElementById("status");
+
+    function createDefaultChannel(number) {
+      return {
+        id: number,
+        name: `CH ${number}`,
+        gain: 50,
+        low: 0,
+        mid: 0,
+        high: 0,
+        pan: 0,
+        fader: 75,
+        mute: false,
+        solo: false
+      };
+    }
+
+    function initializeChannels(count) {
+      const oldChannels = [...state.channels];
+
+      state.channels = Array.from({ length: count }, (_, index) => {
+        return oldChannels[index] || createDefaultChannel(index + 1);
+      });
+
+      state.channelCount = count;
+      renderChannels();
+      setStatus(`${count} channel aktif.`);
+    }
+
+    function setStatus(message) {
+      statusElement.textContent = message;
+    }
+
+    function formatDb(value) {
+      return `${value > 0 ? "+" : ""}${value} dB`;
+    }
+
+    function renderChannels() {
+      channelsElement.innerHTML = "";
+
+      state.channels.forEach((channel, index) => {
+        const element = document.createElement("article");
+        element.className = "channel";
+
+        element.innerHTML = `
+          <div class="channel-title">
+            <span>${channel.name}</span>
+            <small>INPUT ${index + 1}</small>
+          </div>
+
+          <div class="meter" data-meter="${index}">
+            ${Array.from({ length: 10 }, () => "<span></span>").join("")}
+          </div>
+
+          <div class="control-label">
+            <span>GAIN</span>
+            <strong id="gainValue-${index}">${channel.gain}%</strong>
+          </div>
+
+          <input
+            type="range"
+            min="0"
+            max="100"
+            value="${channel.gain}"
+            data-index="${index}"
+            data-control="gain"
+          />
+
+          <div class="knob-row">
+            <div class="knob-box">
+              <div class="control-label">
+                <span>LOW</span>
+              </div>
+              <input
+                class="knob"
+                type="range"
+                min="-12"
+                max="12"
+                value="${channel.low}"
+                data-index="${index}"
+                data-control="low"
+                style="--knob-value: ${((channel.low + 12) / 24) * 100}%"
+              />
+              <small id="lowValue-${index}">${formatDb(channel.low)}</small>
+            </div>
+
+            <div class="knob-box">
+              <div class="control-label">
+                <span>MID</span>
+              </div>
+              <input
+                class="knob"
+                type="range"
+                min="-12"
+                max="12"
+                value="${channel.mid}"
+                data-index="${index}"
+                data-control="mid"
+                style="--knob-value: ${((channel.mid + 12) / 24) * 100}%"
+              />
+              <small id="midValue-${index}">${formatDb(channel.mid)}</small>
+            </div>
+
+            <div class="knob-box">
+              <div class="control-label">
+                <span>HIGH</span>
+              </div>
+              <input
+                class="knob"
+                type="range"
+                min="-12"
+                max="12"
+                value="${channel.high}"
+                data-index="${index}"
+                data-control="high"
+                style="--knob-value: ${((channel.high + 12) / 24) * 100}%"
+              />
+              <small id="highValue-${index}">${formatDb(channel.high)}</small>
+            </div>
+          </div>
+
+          <div class="control-label">
+            <span>PAN</span>
+            <strong id="panValue-${index}">${channel.pan}</strong>
+          </div>
+
+          <input
+            class="pan"
+            type="range"
+            min="-1"
+            max="1"
+            step="0.01"
+            value="${channel.pan}"
+            data-index="${index}"
+            data-control="pan"
+          />
+
+          <div class="control-label">
+            <span>FADER</span>
+            <strong id="faderValue-${index}">${channel.fader}%</strong>
+          </div>
+
+          <div class="vertical-control">
+            <input
+              class="vertical"
+              type="range"
+              min="0"
+              max="100"
+              value="${channel.fader}"
+              data-index="${index}"
+              data-control="fader"
+            />
+          </div>
+
+          <div class="buttons">
+            <button
+              class="mute ${channel.mute ? "active" : ""}"
+              data-index="${index}"
+              data-action="mute"
+            >
+              MUTE
+            </button>
+
+            <button
+              class="solo ${channel.solo ? "active" : ""}"
+              data-index="${index}"
+              data-action="solo"
+            >
+              SOLO
+            </button>
+          </div>
+
+          <div class="channel-footer">
+            <span>LEVEL</span>
+            <span id="levelValue-${index}">${channel.fader}%</span>
+          </div>
+        `;
+
+        channelsElement.appendChild(element);
+      });
+
+      updateMeters();
+    }
+
+    function updateChannelValue(index, control, value) {
+      const channel = state.channels[index];
+      if (!channel) return;
+
+      const numericValue = Number(value);
+      channel[control] = numericValue;
+
+      const valueElement = document.getElementById(
+        `${control}Value-${index}`
+      );
+
+      if (valueElement) {
+        if (control === "low" || control === "mid" || control === "high") {
+          valueElement.textContent = formatDb(numericValue);
+        } else if (control === "fader" || control === "gain") {
+          valueElement.textContent = `${numericValue}%`;
+        } else {
+          valueElement.textContent = numericValue;
+        }
+      }
+
+      const input = document.querySelector(
+        `[data-index="${index}"][data-control="${control}"]`
+      );
+
+      if (input && input.classList.contains("knob")) {
+        input.style.setProperty(
+          "--knob-value",
+          `${((numericValue + 12) / 24) * 100}%`
+        );
+      }
+
+      if (control === "fader") {
+        const levelElement = document.getElementById(`levelValue-${index}`);
+        if (levelElement) {
+          levelElement.textContent = `${numericValue}%`;
+        }
+      }
+
+      updateMeters();
+      setStatus(`${channel.name} ${control.toUpperCase()} = ${value}`);
+    }
+
+    function updateMeters() {
+      document.querySelectorAll("[data-meter]").forEach((meter) => {
+        const index = Number(meter.dataset.meter);
+        const channel = state.channels[index];
+        if (!channel) return;
+
+        const level = channel.mute ? 0 : channel.fader * state.master / 100;
+        const bars = meter.querySelectorAll("span");
+
+        bars.forEach((bar, barIndex) => {
+          const threshold = ((barIndex + 1) / bars.length) * 100;
+          bar.style.opacity = level >= threshold ? "1" : "0.16";
+        });
+      });
+
+      const masterBars = document.querySelectorAll("#masterMeter span");
+      masterBars.forEach((bar, index) => {
+        const threshold = ((index + 1) / masterBars.length) * 100;
+        bar.style.opacity = state.master >= threshold ? "1" : "0.16";
+      });
+
+      document.getElementById("masterMeterValue").textContent =
+        `${state.master}%`;
+    }
+
+    channelsElement.addEventListener("input", (event) => {
+      const input = event.target;
+      if (!input.matches("[data-control]")) return;
+
+      updateChannelValue(
+        Number(input.dataset.index),
+        input.dataset.control,
+        input.value
+      );
+    });
+
+    channelsElement.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-action]");
+      if (!button) return;
+
+      const index = Number(button.dataset.index);
+      const action = button.dataset.action;
+      const channel = state.channels[index];
+
+      if (action === "mute") {
+        channel.mute = !channel.mute;
+      }
+
+      if (action === "solo") {
+        channel.solo = !channel.solo;
+      }
+
+      renderChannels();
+      setStatus(`${channel.name} ${action.toUpperCase()} ${channel[action] ? "ON" : "OFF"}`);
+    });
+
+    document.getElementById("channelCount").addEventListener("change", (event) => {
+      initializeChannels(Number(event.target.value));
+    });
+
+    document.getElementById("addChannel").addEventListener("click", () => {
+      state.channels.push(createDefaultChannel(state.channels.length + 1));
+      state.channelCount = state.channels.length;
+      document.getElementById("channelCount").value =
+        String(state.channelCount);
+      renderChannels();
+      setStatus(`Channel ${state.channelCount} ditambahkan.`);
+    });
+
+    document.getElementById("masterFader").addEventListener("input", (event) => {
+      state.master = Number(event.target.value);
+      document.getElementById("masterValue").textContent = `${state.master}%`;
+      updateMeters();
+      setStatus(`MASTER = ${state.master}%`);
+    });
+
+    document.getElementById("masterMute").addEventListener("click", (event) => {
+      state.masterMute = !state.masterMute;
+      event.currentTarget.classList.toggle("active", state.masterMute);
+      setStatus(`MASTER MUTE ${state.masterMute ? "ON" : "OFF"}`);
+    });
+
+    document.getElementById("masterSolo").addEventListener("click", (event) => {
+      state.masterSolo = !state.masterSolo;
+      event.currentTarget.classList.toggle("active", state.masterSolo);
+      setStatus(`MASTER SOLO ${state.masterSolo ? "ON" : "OFF"}`);
+    });
+
+    document.getElementById("saveSettings").addEventListener("click", () => {
+      localStorage.setItem("equalizerSettings", JSON.stringify(state));
+      setStatus("Semua setting berhasil disimpan di perangkat.");
+    });
+
+    document.getElementById("loadSettings").addEventListener("click", () => {
+      const saved = localStorage.getItem("equalizerSettings");
+
+      if (!saved) {
+        setStatus("Belum ada setting yang tersimpan.");
+        return;
+      }
+
+      const loaded = JSON.parse(saved);
+      Object.assign(state, loaded);
+
+      document.getElementById("channelCount").value =
+        String(state.channelCount);
+      document.getElementById("masterFader").value = state.master;
+      document.getElementById("masterValue").textContent = `${state.master}%`;
+
+      renderChannels();
+      setStatus("Setting berhasil dimuat.");
+    });
+
+    document.getElementById("resetSettings").addEventListener("click", () => {
+      state.master = 80;
+      state.masterMute = false;
+      state.masterSolo = false;
+
+      initializeChannels(state.channelCount);
+
+      document.getElementById("masterFader").value = state.master;
+      document.getElementById("masterValue").textContent = `${state.master}%`;
+      document.getElementById("masterMute").classList.remove("active");
+      document.getElementById("masterSolo").classList.remove("active");
+
+      setStatus("Semua setting dikembalikan ke awal.");
+    });
+
+    initializeChannels(16);
+  </script>
+</body>
+</html>
