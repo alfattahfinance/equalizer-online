@@ -376,6 +376,64 @@
   color: #9ca3af;
   font-size: 12px;
 }
+
+    .audio-panel {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid #6b7280;
+  border-radius: 6px;
+  background: #111827;
+}
+
+.audio-panel h3 {
+  margin: 0 0 10px;
+  color: #fbbf24;
+  font-size: 15px;
+}
+
+.audio-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.file-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  padding: 8px 10px;
+  border: 1px solid #4b5563;
+  border-radius: 5px;
+  background: #1f2937;
+  color: white;
+  cursor: pointer;
+}
+
+.file-button:hover {
+  background: #374151;
+}
+
+#audioPlayer {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+}
+
+.audio-status {
+  margin-top: 8px;
+  color: #9ca3af;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+@media (max-width: 480px) {
+  .audio-actions button,
+  .file-button {
+    width: 100%;
+  }
+}
   </style>
 </head>
 
