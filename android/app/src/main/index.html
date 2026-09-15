@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#111827">
+  <meta name="description" content="Ashly GQX-3102 Grade A Equalizer Online">
+  <link rel="manifest" href="manifest.json">
+
+  <title>GQX-3102 Equalizer Online</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      font-family: Arial, sans-serif;
+      background:
+        radial-gradient(circle at top, #374151, #111827 55%, #030712);
+      color: #f9fafb;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .app {
+      width: min(1500px, 100%);
+      margin: auto;
+      padding: 12px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .brand {
+      font-weight: bold;
+      letter-spacing: 1px;
+      font-size: 22px;
+    }
+
+    .subtitle {
+      color: #9ca3af;
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    button,
+    select {
+      border: 1px solid #4b5563;
+      background: #1f2937;
+      color: white;
+      border-radius: 5px;
+      padding: 8px 10px;
+    }
+
+    button:hover {
+      background: #374151;
+    }
+
+    button.active {
+      background: #b91c1c;
+      border-color: #ef4444;
+    }
+
+    .rack {
+      border: 2px solid #6b7280;
+      border-radius: 8px;
+      padding: 12px;
+      background:
+        linear-gradient(145deg, #4b5563, #111827 35%, #1f2937);
+      box-shadow:
+        inset 0 0 0 2px #111827,
+        0 12px 30px rgba(0, 0, 0, .4);
+    }
+
+    .rack-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      border-bottom: 2px solid #111827;
+      padding-bottom: 10px;
+      margin-bottom: 12px;
+    }
+
+    .model {
+      font-size: 20px;
+      font-weight: bold;
+      letter-spacing: 2px;
+    }
+
+    .grade {
+      color: #fbbf24;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .channels {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .channel {
+      min-width: 0;
+      background: linear-gradient(#374151, #1f2937);
+      border: 1px solid #6b7280;
+      border-radius: 6px;
+      padding: 10px;
+    }
+
+    .channel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .channel-title {
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    .channel-controls {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+    }
+
+    .small-button {
+      padding: 5px 8px;
+      font-size: 11px;
+    }
+
+    .control-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .control {
+      background: #111827;
+      border: 1px solid #4b5563;
+      border-radius: 5px;
+      padding: 8px;
+    }
+
+    .control label {
+      display: block;
+      font-size: 11px;
+      color: #d1d5db;
+      margin-bottom: 6px;
+    }
+
+    .control input,
+    .control select {
+      width: 100%;
+      min-width: 0;
+    }
+
+    .meter-area {
+      display: grid;
+      grid-template-columns: 1fr 55px;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .meter {
+      height: 14px;
+      display: flex;
+      gap: 2px;
+      padding: 2px;
+      background: #030712;
+      border: 1px solid #4b5563;
+      border-radius: 3px;
+    }
+
+    .meter span {
+      flex: 1;
+      background: #14532d;
+      opacity: .25;
+    }
+
+    .meter span.on {
+      opacity: 1;
+    }
+
+    .meter span:nth-child(n+7).on {
+      background: #eab308;
+    }
+
+    .meter span:nth-child(n+9).on {
+      background: #ef4444;
+    }
+
+    .clip {
+      text-align: center;
+      padding: 5px;
+      border-radius: 4px;
+      background: #450a0a;
+      color: #fca5a5;
+      font-size: 11px;
+      font-weight: bold;
+    }
+
+    .clip.on {
+      background: #dc2626;
+      color: white;
+    }
+
+    .eq-section {
+      overflow-x: auto;
+      padding-bottom: 6px;
+    }
+
+    .eq {
+      display: grid;
+      grid-template-columns: repeat(31, minmax(35px, 1fr));
+      gap: 4px;
+      min-width: 1160px;
+      align-items: end;
+    }
+
+    .band {
+      position: relative;
+      height: 245px;
+      min-width: 0;
+      background: #111827;
+      border: 1px solid #4b5563;
+      border-radius: 4px;
+      padding: 4px 2px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .band-frequency {
+      font-size: 9px;
+      color: #d1d5db;
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      height: 44px;
+      text-align: center;
+    }
+
+    .band input[type="range"] {
+      width: 205px;
+      transform: rotate(-90deg);
+      margin: 80px -82px;
+      accent-color: #f59e0b;
+    }
+
+    .band-value {
+      font-size: 9px;
+      color: #fbbf24;
+      min-height: 12px;
+    }
+
+    .scale {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      color: #9ca3af;
+      margin-top: 5px;
+    }
+
+    .footer {
+      color: #9ca3af;
+      text-align: center;
+      font-size: 11px;
+      padding: 12px 0 4px;
+    }
+
+    .status {
+      margin-top: 10px;
+      padding: 8px;
+      background: #111827;
+      border: 1px solid #4b5563;
+      border-radius: 5px;
+      color: #d1d5db;
+      font-size: 12px;
+    }
+
+    @media (max-width: 850px) {
+      .channels {
+        grid-template-columns: 1fr;
+      }
+
+      .brand {
+        font-size: 18px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .app {
+        padding: 6px;
+      }
+
+      .rack {
+        padding: 7px;
+      }
+
+      .control-row {
+        grid-template-columns: 1fr;
+      }
+
+      .model {
+        font-size: 16px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div>
+        <div class="brand">EQUALIZER ONLINE</div>
+        <div class="subtitle">Digital Graphic Equalizer • 2 × 31 Band</div>
+      </div>
+
+      <div class="actions">
+        <button id="saveButton">SAVE</button>
+        <button id="loadButton">RECALL</button>
+        <button id="resetButton">RESET</button>
+      </div>
+    </header>
+
+    <section class="rack">
+      <div class="rack-header">
+        <div>
+          <div class="model">GQX-3102</div>
+          <div class="grade">GRADE A • GRAPHIC EQUALIZER</div>
+        </div>
+
+        <div class="actions">
+          <button id="flatButton">FLAT</button>
+          <button id="vocalButton">VOCAL</button>
+          <button id="musicButton">MUSIC</button>
+        </div>
+      </div>
+
+      <section class="channels">
+        <article class="channel" data-channel="0">
+          <div class="channel-header">
+            <div class="channel-title">CHANNEL 1</div>
+            <div class="channel-controls">
+              <button class="small-button bypass-button">BYPASS</button>
+              <button class="small-button test-button">TEST</button>
+            </div>
+          </div>
+
+          <div class="control-row">
+            <div class="control">
+              <label>GAIN</label>
+              <input class="gain" type="range" min="-12" max="12" step="0.5" value="0">
+              <div class="gain-value">0 dB</div>
+            </div>
+
+            <div class="control">
+              <label>HPF</label>
+              <select class="hpf">
+                <option value="off">OFF</option>
+                <option value="40">40 Hz</option>
+                <option value="80">80 Hz</option>
+                <option value="120">120 Hz</option>
+              </select>
+            </div>
+
+            <div class="control">
+              <label>RANGE</label>
+              <select class="range">
+                <option value="6">±6 dB</option>
+                <option value="15" selected>±15 dB</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="meter-area">
+            <div class="meter"></div>
+            <div class="clip">CLIP</div>
+          </div>
+
+          <div class="eq-section">
+            <div class="eq"></div>
+          </div>
+
+          <div class="scale">
+            <span>+15 dB</span>
+            <span>0 dB</span>
+            <span>-15 dB</span>
+          </div>
+        </article>
+
+        <article class="channel" data-channel="1">
+          <div class="channel-header">
+            <div class="channel-title">CHANNEL 2</div>
+            <div class="channel-controls">
+              <button class="small-button bypass-button">BYPASS</button>
+              <button class="small-button test-button">TEST</button>
+            </div>
+          </div>
+
+          <div class="control-row">
+            <div class="control">
+              <label>GAIN</label>
+              <input class="gain" type="range" min="-12" max="12" step="0.5" value="0">
+              <div class="gain-value">0 dB</div>
+            </div>
+
+            <div class="control">
+              <label>HPF</label>
+              <select class="hpf">
+                <option value="off">OFF</option>
+                <option value="40">40 Hz</option>
+                <option value="80">80 Hz</option>
+                <option value="120">120 Hz</option>
+              </select>
+            </div>
+
+            <div class="control">
+              <label>RANGE</label>
+              <select class="range">
+                <option value="6">±6 dB</option>
+                <option value="15" selected>±15 dB</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="meter-area">
+            <div class="meter"></div>
+            <div class="clip">CLIP</div>
+          </div>
+
+          <div class="eq-section">
+            <div class="eq"></div>
+          </div>
+
+          <div class="scale">
+            <span>+15 dB</span>
+            <span>0 dB</span>
+            <span>-15 dB</span>
+          </div>
+        </article>
+      </section>
+
+      <div id="status" class="status">
+        Status: sistem siap digunakan.
+      </div>
+    </section>
+
+    <div class="footer">
+      Equalizer Online • Web/PWA • Dapat dibungkus menjadi APK Android
+    </div>
+  </main>
+
+  <script>
+    const frequencies = [
+      20, 25, 31.5, 40, 50, 63, 80, 100, 125, 160,
+      200, 250, 315, 400, 500, 630, 800, 1000, 1250,
+      1600, 2000, 2500, 3150, 4000, 5000, 6300, 8000,
+      10000, 12500, 16000, 20000
+    ];
+
+    const channels = [...document.querySelectorAll(".channel")];
+
+    function setStatus(message) {
+      document.getElementById("status").textContent = "Status: " + message;
+    }
+
+    function formatFrequency(value) {
+      return Number.isInteger(value) ? value : value.toFixed(1);
+    }
+
+    function createBands(channel) {
+      const eq = channel.querySelector(".eq");
+
+      frequencies.forEach((frequency, index) => {
+        const band = document.createElement("div");
+        band.className = "band";
+
+        const frequencyLabel = document.createElement("div");
+        frequencyLabel.className = "band-frequency";
+        frequencyLabel.textContent = formatFrequency(frequency) + " Hz";
+
+        const slider = document.createElement("input");
+        slider.type = "range";
+        slider.min = "-15";
+        slider.max = "15";
+        slider.step = "0.5";
+        slider.value = "0";
+        slider.dataset.band = index;
+
+        const value = document.createElement("div");
+        value.className = "band-value";
+        value.textContent = "0";
+
+        slider.addEventListener("input", () => {
+          value.textContent = Number(slider.value).toFixed(1);
+          updateMeter(channel);
+        });
+
+        band.append(frequencyLabel, slider, value);
+        eq.appendChild(band);
+      });
+    }
+
+    function updateMeter(channel) {
+      const meter = channel.querySelector(".meter");
+      const clip = channel.querySelector(".clip");
+      const sliders = [...channel.querySelectorAll(".band input")];
+      const gain = Number(channel.querySelector(".gain").value);
+      const maximum = Math.max(
+        ...sliders.map(slider => Math.abs(Number(slider.value)))
+      );
+
+      const level = Math.min(10, Math.round((maximum + Math.abs(gain)) / 3));
+      meter.innerHTML = "";
+
+      for (let i = 0; i < 10; i++) {
+        const segment = document.createElement("span");
+
+        if (i < level) {
+          segment.classList.add("on");
+        }
+
+        meter.appendChild(segment);
+      }
+
+      clip.classList.toggle("on", level >= 10);
+    }
+
+    function setRange(channel, range) {
+      const max = Number(range);
+      channel.querySelectorAll(".band input").forEach(slider => {
+        slider.min = -max;
+        slider.max = max;
+
+        if (Number(slider.value) > max) slider.value = max;
+        if (Number(slider.value) < -max) slider.value = -max;
+      });
+
+      channel.querySelector(".scale").innerHTML =
+        `<span>+${max} dB</span><span>0 dB</span><span>-${max} dB</span>`;
+
+      updateValues(channel);
+    }
+
+    function updateValues(channel) {
+      channel.querySelector(".gain-value").textContent =
+        Number(channel.querySelector(".gain").value).toFixed(1) + " dB";
+
+      channel.querySelectorAll(".band").forEach(band => {
+        const slider = band.querySelector("input");
+        band.querySelector(".band-value").textContent =
+          Number(slider.value).toFixed(1);
+      });
+
+      updateMeter(channel);
+    }
+
+    function setPreset(type) {
+      channels.forEach(channel => {
+        channel.querySelector(".gain").value = 0;
+
+        channel.querySelectorAll(".band input").forEach((slider, index) => {
+          let value = 0;
+
+          if (type === "vocal") {
+            if (index >= 13 && index <= 21) value = 3;
+            if (index <= 5) value = -2;
+            if (index >= 25) value = 2;
+          }
+
+          if (type === "music") {
+            if (index <= 5) value = 4;
+            if (index >= 23) value = 3;
+            if (index >= 12 && index <= 18) value = -1;
+          }
+
+          slider.value = value;
+        });
+
+        updateValues(channel);
+      });
+
+      setStatus("Preset " + type.toUpperCase() + " diterapkan.");
+    }
+
+    channels.forEach(channel => {
+      createBands(channel);
+
+      channel.querySelector(".gain").addEventListener("input", () => {
+        updateValues(channel);
+      });
+
+      channel.querySelector(".range").addEventListener("change", event => {
+        setRange(channel, event.target.value);
+      });
+
+      channel.querySelector(".bypass-button").addEventListener("click", event => {
+        event.currentTarget.classList.toggle("active");
+
+        const bypassed = event.currentTarget.classList.contains("active");
+        channel.querySelectorAll("input, select").forEach(control => {
+          control.disabled = bypassed;
+        });
+
+        setStatus(
+          channel.dataset.channel === "0" ? "Channel 1" : "Channel 2"
+        );
+
+        setStatus(bypassed ? "Bypass aktif." : "Bypass nonaktif.");
+      });
+
+      channel.querySelector(".test-button").addEventListener("click", event => {
+        event.currentTarget.classList.toggle("active");
+        const testing = event.currentTarget.classList.contains("active");
+
+        channel.querySelector(".gain").value = testing ? 6 : 0;
+        channel.querySelectorAll(".band input").forEach(slider => {
+          slider.value = testing ? 2 : 0;
+        });
+
+        updateValues(channel);
+        setStatus(testing ? "Test signal aktif." : "Test signal nonaktif.");
+      });
+
+      updateValues(channel);
+    });
+
+    document.getElementById("flatButton").addEventListener("click", () => {
+      setPreset("flat");
+    });
+
+    document.getElementById("vocalButton").addEventListener("click", () => {
+      setPreset("vocal");
+    });
+
+    document.getElementById("musicButton").addEventListener("click", () => {
+      setPreset("music");
+    });
+
+    document.getElementById("saveButton").addEventListener("click", () => {
+      const data = channels.map(channel => ({
+        gain: channel.querySelector(".gain").value,
+        hpf: channel.querySelector(".hpf").value,
+        range: channel.querySelector(".range").value,
+        bypass: channel.querySelector(".bypass-button").classList.contains("active"),
+        bands: [...channel.querySelectorAll(".band input")].map(slider => slider.value)
+      }));
+
+      localStorage.setItem("equalizer-settings", JSON.stringify(data));
+      setStatus("Setting berhasil disimpan di perangkat.");
+    });
+
+    document.getElementById("loadButton").addEventListener("click", () => {
+      const saved = localStorage.getItem("equalizer-settings");
+
+      if (!saved) {
+        setStatus("Belum ada setting yang tersimpan.");
+        return;
+      }
+
+      const data = JSON.parse(saved);
+
+      channels.forEach((channel, index) => {
+        const item = data[index];
+
+        channel.querySelector(".gain").value = item.gain;
+        channel.querySelector(".hpf").value = item.hpf;
+        channel.querySelector(".range").value = item.range;
+
+        setRange(channel, item.range);
+
+        channel.querySelectorAll(".band input").forEach((slider, bandIndex) => {
+          slider.value = item.bands[bandIndex];
+        });
+
+        const bypassButton = channel.querySelector(".bypass-button");
+        bypassButton.classList.toggle("active", item.bypass);
+
+        channel.querySelectorAll("input, select").forEach(control => {
+          control.disabled = item.bypass;
+        });
+
+        updateValues(channel);
+      });
+
+      setStatus("Setting berhasil dipanggil kembali.");
+    });
+
+    document.getElementById("resetButton").addEventListener("click", () => {
+      channels.forEach(channel => {
+        channel.querySelector(".gain").value = 0;
+        channel.querySelector(".hpf").value = "off";
+        channel.querySelector(".range").value = "15";
+
+        channel.querySelectorAll(".band input").forEach(slider => {
+          slider.min = "-15";
+          slider.max = "15";
+          slider.value = 0;
+        });
+
+        channel.querySelector(".bypass-button").classList.remove("active");
+        channel.querySelector(".test-button").classList.remove("active");
+
+        channel.querySelectorAll("input, select").forEach(control => {
+          control.disabled = false;
+        });
+
+        updateValues(channel);
+      });
+
+      setStatus("Semua setting dikembalikan ke posisi awal.");
+    });
+
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("sw.js").catch(() => {
+          console.log("Service worker belum aktif.");
+        });
+      });
+    }
+  </script>
+</body>
+</html>
