@@ -1,0 +1,91 @@
+name: Build Equalizer Android APK
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android-apk
+  cancel-in-progress: true
+
+jobs:
+  build-apk:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: android
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check Android project
+        run: |
+          test -f gradlew
+          test -f settings.gradle
+          test -d app
+
+      - name: Set executable permission
+        run: chmod +x gradlew
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - name: Build debug APK
+        run: ./gradlew assembleDebug --stacktrace
+
+      - name: Rename APK
+        run: |
+          mkdir -p ../release
+          cp app/build/outputs/apk/debug/app-debug.apk \
+             ../release/equalizer-online-debug.apk
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: equalizer-online-apk
+          path: release/equalizer-online-debug.apk
+          if-no-files-found: error
+
+  release:
+    name: Create GitHub Release
+    needs: build-apk
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Download APK artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: equalizer-online-apk
+          path: release
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: apk-${{ github.run_number }}
+          name: Equalizer Online APK ${{ github.run_number }}
+          body: |
+            Automatic APK build from commit:
+
+            ${{ github.sha }}
+
+            File ini adalah APK debug untuk pengujian.
+          files: release/equalizer-online-debug.apk
+          generate_release_notes: true
