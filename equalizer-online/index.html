@@ -335,6 +335,47 @@
         font-size: 16px;
       }
     }
+
+    .audio-panel {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid #6b7280;
+  border-radius: 6px;
+  background: #111827;
+}
+
+.audio-panel h3 {
+  margin: 0 0 10px;
+  color: #fbbf24;
+}
+
+.audio-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.file-button {
+  display: inline-block;
+  padding: 8px 10px;
+  border: 1px solid #4b5563;
+  border-radius: 5px;
+  background: #1f2937;
+  color: white;
+  cursor: pointer;
+}
+
+#audioPlayer {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.audio-status {
+  margin-top: 8px;
+  color: #9ca3af;
+  font-size: 12px;
+}
   </style>
 </head>
 
@@ -470,6 +511,28 @@
           </div>
         </article>
       </section>
+
+      <div class="audio-panel">
+  <h3>Audio Engine</h3>
+
+  <div class="audio-actions">
+    <button id="startMicButton">MIC INPUT</button>
+
+    <label class="file-button">
+      PILIH FILE AUDIO
+      <input id="audioFile" type="file" accept="audio/*" hidden>
+    </label>
+
+    <button id="startAudioButton">START AUDIO</button>
+    <button id="stopAudioButton">STOP AUDIO</button>
+  </div>
+
+  <audio id="audioPlayer" controls></audio>
+
+  <div class="audio-status" id="audioStatus">
+    Audio belum aktif.
+  </div>
+</div>
 
       <div id="status" class="status">
         Status: sistem siap digunakan.
@@ -749,6 +812,212 @@
         });
       });
     }
+
+    let audioContext = null;
+let microphoneStream = null;
+let sourceNode = null;
+let audioElementSource = null;
+let masterGainNode = null;
+
+const audioFile = document.getElementById("audioFile");
+const audioPlayer = document.getElementById("audioPlayer");
+const audioStatus = document.getElementById("audioStatus");
+
+const startMicButton = document.getElementById("startMicButton");
+const startAudioButton = document.getElementById("startAudioButton");
+const stopAudioButton = document.getElementById("stopAudioButton");
+
+function setAudioStatus(message) {
+  audioStatus.textContent = message;
+}
+
+function createAudioContext() {
+  if (!audioContext) {
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  }
+
+  if (audioContext.state === "suspended") {
+    audioContext.resume();
+  }
+}
+
+function createEqualizer(channelIndex) {
+  const channel = channels[channelIndex];
+  const bypassButton = channel.querySelector(".bypass-button");
+  const gainControl = channel.querySelector(".gain");
+  const hpfControl = channel.querySelector(".hpf");
+  const bandControls = [...channel.querySelectorAll(".band input")];
+
+  const inputGain = audioContext.createGain();
+  const highPass = audioContext.createBiquadFilter();
+
+  inputGain.type = "gain";
+  inputGain.gain.value =
+    Math.pow(10, Number(gainControl.value) / 20);
+
+  highPass.type = "highpass";
+  highPass.frequency.value =
+    hpfControl.value === "off" ? 20 : Number(hpfControl.value);
+  highPass.Q.value = 0.707;
+
+  inputGain.connect(highPass);
+
+  let previousNode = highPass;
+  const filters = [];
+
+  bandControls.forEach((control, index) => {
+    const filter = audioContext.createBiquadFilter();
+
+    filter.type = "peaking";
+    filter.frequency.value = frequencies[index];
+    filter.Q.value = 1.4;
+    filter.gain.value = Number(control.value);
+
+    previousNode.connect(filter);
+    previousNode = filter;
+    filters.push(filter);
+  });
+
+  gainControl.addEventListener("input", () => {
+    inputGain.gain.value =
+      Math.pow(10, Number(gainControl.value) / 20);
+  });
+
+  hpfControl.addEventListener("change", () => {
+    highPass.frequency.value =
+      hpfControl.value === "off" ? 20 : Number(hpfControl.value);
+  });
+
+  bandControls.forEach((control, index) => {
+    control.addEventListener("input", () => {
+      filters[index].gain.value =
+        bypassButton.classList.contains("active")
+          ? 0
+          : Number(control.value);
+    });
+  });
+
+  bypassButton.addEventListener("click", () => {
+    const bypassed = bypassButton.classList.contains("active");
+
+    filters.forEach((filter, index) => {
+      filter.gain.value = bypassed
+        ? 0
+        : Number(bandControls[index].value);
+    });
+  });
+
+  return {
+    inputGain,
+    output: previousNode
+  };
+}
+
+function connectAudioSource(source) {
+  createAudioContext();
+
+  if (sourceNode) {
+    try {
+      sourceNode.disconnect();
+    } catch (error) {}
+  }
+
+  const equalizer1 = createEqualizer(0);
+  const equalizer2 = createEqualizer(1);
+
+  const splitter = audioContext.createChannelSplitter(2);
+  const merger = audioContext.createChannelMerger(2);
+
+  masterGainNode = audioContext.createGain();
+  masterGainNode.gain.value = 0.8;
+
+  source.connect(splitter);
+
+  splitter.connect(equalizer1.inputGain, 0);
+  splitter.connect(equalizer2.inputGain, 1);
+
+  equalizer1.output.connect(merger, 0, 0);
+  equalizer2.output.connect(merger, 0, 1);
+
+  merger.connect(masterGainNode);
+  masterGainNode.connect(audioContext.destination);
+
+  sourceNode = source;
+
+  setAudioStatus("Audio aktif. EQ Channel 1 dan Channel 2 sedang memproses suara.");
+}
+
+audioFile.addEventListener("change", event => {
+  const file = event.target.files[0];
+
+  if (!file) {
+    return;
+  }
+
+  createAudioContext();
+
+  if (audioElementSource) {
+    try {
+      audioElementSource.disconnect();
+    } catch (error) {}
+  }
+
+  audioPlayer.src = URL.createObjectURL(file);
+  audioPlayer.load();
+
+  audioElementSource =
+    audioContext.createMediaElementSource(audioPlayer);
+
+  connectAudioSource(audioElementSource);
+
+  setAudioStatus("File audio siap diputar.");
+});
+
+startAudioButton.addEventListener("click", async () => {
+  if (!audioPlayer.src) {
+    setAudioStatus("Pilih file audio terlebih dahulu.");
+    return;
+  }
+
+  createAudioContext();
+
+  try {
+    await audioPlayer.play();
+    setAudioStatus("File audio sedang diputar melalui EQ.");
+  } catch (error) {
+    setAudioStatus("Pemutaran audio diblokir browser.");
+  }
+});
+
+stopAudioButton.addEventListener("click", () => {
+  audioPlayer.pause();
+  setAudioStatus("Audio dihentikan.");
+});
+
+startMicButton.addEventListener("click", async () => {
+  createAudioContext();
+
+  try {
+    microphoneStream = await navigator.mediaDevices.getUserMedia({
+      audio: {
+        echoCancellation: false,
+        noiseSuppression: false,
+        autoGainControl: false
+      }
+    });
+
+    const microphoneSource =
+      audioContext.createMediaStreamSource(microphoneStream);
+
+    connectAudioSource(microphoneSource);
+
+    setAudioStatus("Mikrofon aktif. Suara diproses oleh EQ.");
+  } catch (error) {
+    setAudioStatus(
+      "Mikrofon tidak dapat digunakan. Periksa izin mikrofon."
+    );
+  }
+});
   </script>
 </body>
 </html>
