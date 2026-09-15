@@ -27,19 +27,20 @@ jobs:
 
       - name: Verify web files
         run: |
-          test -f index.html
-          test -f manifest.json
-          test -f sw.js
+          test -f equalizer-online/index.html
+          test -f equalizer-online/manifest.json
+          test -f equalizer-online/sw.js
 
       - name: Upload website artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: equalizer-online
 
   deploy:
     name: Deploy to GitHub Pages
     needs: build
     runs-on: ubuntu-latest
+
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
