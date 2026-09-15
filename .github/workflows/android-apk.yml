@@ -1,4 +1,4 @@
-name: Build Equalizer Android APK
+name: Build Android APK
 
 on:
   push:
@@ -23,38 +23,35 @@ jobs:
     name: Build Android APK
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: android
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Check Android project
         run: |
-          test -f gradlew
-          test -f settings.gradle
-          test -d app
-
-      - name: Set executable permission
-        run: chmod +x gradlew
+          test -d android
+          test -f android/settings.gradle
+          test -f android/app/build.gradle
 
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
-          cache: gradle
+
+      - name: Set up Gradle
+        uses: gradle/gradle-build-action@v3
+        with:
+          gradle-version: "8.7"
 
       - name: Build debug APK
-        run: ./gradlew assembleDebug --stacktrace
+        run: gradle -p android assembleDebug --stacktrace
 
-      - name: Rename APK
+      - name: Prepare APK
         run: |
-          mkdir -p ../release
-          cp app/build/outputs/apk/debug/app-debug.apk \
-             ../release/equalizer-online-debug.apk
+          mkdir -p release
+          cp android/app/build/outputs/apk/debug/app-debug.apk \
+             release/equalizer-online-debug.apk
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
@@ -70,22 +67,19 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
     steps:
-      - name: Download APK artifact
+      - name: Download APK
         uses: actions/download-artifact@v4
         with:
           name: equalizer-online-apk
           path: release
 
-      - name: Create release
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: apk-${{ github.run_number }}
           name: Equalizer Online APK ${{ github.run_number }}
           body: |
-            Automatic APK build from commit:
-
+            APK otomatis dibuat dari commit:
             ${{ github.sha }}
-
-            File ini adalah APK debug untuk pengujian.
           files: release/equalizer-online-debug.apk
           generate_release_notes: true
