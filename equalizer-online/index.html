@@ -454,6 +454,59 @@
         width: 100%;
       }
     }
+
+    .input-device-panel {
+  margin-top: 10px;
+  padding: 10px;
+  background: #030712;
+  border: 1px solid #4b5563;
+  border-radius: 5px;
+}
+
+.input-device-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  align-items: end;
+}
+
+.input-device-row label {
+  display: block;
+  margin-bottom: 6px;
+  color: #d1d5db;
+  font-size: 11px;
+}
+
+.input-device-row select {
+  width: 100%;
+  min-width: 0;
+}
+
+.input-device-row button {
+  white-space: nowrap;
+}
+
+.device-status {
+  margin-top: 8px;
+  color: #9ca3af;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.input-active {
+  border-color: #10b981 !important;
+  background: #064e3b !important;
+}
+
+@media (max-width: 480px) {
+  .input-device-row {
+    grid-template-columns: 1fr;
+  }
+
+  .input-device-row button {
+    width: 100%;
+  }
+}
   </style>
 </head>
 
@@ -630,6 +683,29 @@
         <h3>AUDIO ENGINE</h3>
 
         <div class="audio-actions">
+        <div class="input-device-panel">
+  <div class="input-device-row">
+    <div>
+      <label for="inputDeviceSelect">
+        INPUT DEVICE / MIXER FISIK
+      </label>
+
+      <select id="inputDeviceSelect">
+        <option value="">
+          Default microphone
+        </option>
+      </select>
+    </div>
+
+    <button id="refreshInputDevicesButton">
+      REFRESH
+    </button>
+  </div>
+
+  <div id="inputDeviceStatus" class="device-status">
+    Perangkat input belum dipindai.
+  </div>
+</div>
           <button id="startMicButton">
             MIC INPUT
           </button>
@@ -719,1414 +795,1520 @@
   </main>
 
   <script>
-    "use strict";
+"use strict";
 
-    /*
-    =========================================================
-    DATA FREKUENSI
-    =========================================================
-    */
+/* =========================================================
+   DATA FREKUENSI
+========================================================= */
 
-    const frequencies = [
-      20, 25, 31.5, 40, 50, 63, 80, 100, 125, 160,
-      200, 250, 315, 400, 500, 630, 800, 1000, 1250,
-      1600, 2000, 2500, 3150, 4000, 5000, 6300, 8000,
-      10000, 12500, 16000, 20000
-    ];
+const frequencies = [
+  20, 25, 31.5, 40, 50, 63, 80, 100, 125, 160,
+  200, 250, 315, 400, 500, 630, 800, 1000, 1250,
+  1600, 2000, 2500, 3150, 4000, 5000, 6300, 8000,
+  10000, 12500, 16000, 20000
+];
 
-    const channels = [
-      ...document.querySelectorAll(".channel")
-    ];
+const channels = [
+  ...document.querySelectorAll(".channel")
+];
 
-    /*
-    =========================================================
-    STATUS UI
-    =========================================================
-    */
+/* =========================================================
+   STATUS
+========================================================= */
 
-    function setStatus(message) {
-      const status = document.getElementById("status");
+function setStatus(message) {
+  const element = document.getElementById("status");
 
-      if (status) {
-        status.textContent = "Status: " + message;
-      }
-    }
+  if (element) {
+    element.textContent = "Status: " + message;
+  }
+}
 
-    function setAudioStatus(message) {
-      const element = document.getElementById("audioStatus");
+function setAudioStatus(message) {
+  const element = document.getElementById("audioStatus");
 
-      if (element) {
-        element.textContent = message;
-      }
-    }
+  if (element) {
+    element.textContent = message;
+  }
+}
 
-    function setFeedbackStatus(message) {
-      const element = document.getElementById("feedbackStatus");
+function setFeedbackStatus(message) {
+  const element = document.getElementById("feedbackStatus");
 
-      if (element) {
-        element.textContent = message;
-      }
-    }
+  if (element) {
+    element.textContent = message;
+  }
+}
 
-    function formatFrequency(value) {
-      return Number.isInteger(value)
-        ? String(value)
-        : value.toFixed(1);
-    }
+function formatFrequency(value) {
+  return Number.isInteger(value)
+    ? String(value)
+    : value.toFixed(1);
+}
 
-    /*
-    =========================================================
-    PEMBUATAN 31 BAND
-    =========================================================
-    */
+/* =========================================================
+   PEMBUATAN 31 BAND
+========================================================= */
 
-    function createBands(channel) {
-      const eq = channel.querySelector(".eq");
+function createBands(channel) {
+  const eq = channel.querySelector(".eq");
 
-      if (!eq || eq.children.length > 0) {
-        return;
-      }
+  if (!eq || eq.children.length > 0) {
+    return;
+  }
 
-      frequencies.forEach((frequency, index) => {
-        const band = document.createElement("div");
-        band.className = "band";
+  frequencies.forEach((frequency, index) => {
+    const band = document.createElement("div");
+    band.className = "band";
 
-        const frequencyLabel = document.createElement("div");
-        frequencyLabel.className = "band-frequency";
-        frequencyLabel.textContent =
-          formatFrequency(frequency) + " Hz";
+    const frequencyLabel = document.createElement("div");
+    frequencyLabel.className = "band-frequency";
+    frequencyLabel.textContent =
+      formatFrequency(frequency) + " Hz";
 
-        const slider = document.createElement("input");
-        slider.type = "range";
-        slider.min = "-15";
-        slider.max = "15";
-        slider.step = "0.5";
-        slider.value = "0";
-        slider.dataset.band = String(index);
-        slider.setAttribute(
-          "aria-label",
-          "EQ " + formatFrequency(frequency) + " Hz"
-        );
+    const slider = document.createElement("input");
 
-        const value = document.createElement("div");
-        value.className = "band-value";
-        value.textContent = "0.0";
+    slider.type = "range";
+    slider.min = "-15";
+    slider.max = "15";
+    slider.step = "0.5";
+    slider.value = "0";
+    slider.dataset.band = String(index);
 
-        slider.addEventListener("input", () => {
-          value.textContent =
-            Number(slider.value).toFixed(1);
+    slider.setAttribute(
+      "aria-label",
+      "EQ " + formatFrequency(frequency) + " Hz"
+    );
 
-          updateMeter(channel);
-        });
+    const value = document.createElement("div");
+    value.className = "band-value";
+    value.textContent = "0.0";
 
-        band.append(
-          frequencyLabel,
-          slider,
-          value
-        );
+    slider.addEventListener("input", () => {
+      value.textContent =
+        Number(slider.value).toFixed(1);
 
-        eq.appendChild(band);
-      });
-    }
-
-    /*
-    =========================================================
-    UI METER CADANGAN
-    =========================================================
-    */
-
-    function updateMeter(channel) {
-      const meter = channel.querySelector(".meter");
-      const clip = channel.querySelector(".clip");
-
-      if (!meter || !clip) {
-        return;
-      }
-
-      const sliders = [
-        ...channel.querySelectorAll(".band input")
-      ];
-
-      const gain = Number(
-        channel.querySelector(".gain").value
-      );
-
-      const maximum = sliders.length
-        ? Math.max(
-            ...sliders.map(slider =>
-              Math.abs(Number(slider.value))
-            )
-          )
-        : 0;
-
-      const level = Math.min(
-        10,
-        Math.round((maximum + Math.abs(gain)) / 3)
-      );
-
-      meter.innerHTML = "";
-
-      for (let index = 0; index < 10; index++) {
-        const segment = document.createElement("span");
-
-        if (index < level) {
-          segment.classList.add("on");
-        }
-
-        meter.appendChild(segment);
-      }
-
-      clip.classList.toggle("on", level >= 10);
-    }
-
-    /*
-    =========================================================
-    RANGE EQ
-    =========================================================
-    */
-
-    function setRange(channel, range) {
-      const max = Number(range);
-
-      channel
-        .querySelectorAll(".band input")
-        .forEach(slider => {
-          slider.min = String(-max);
-          slider.max = String(max);
-
-          if (Number(slider.value) > max) {
-            slider.value = String(max);
-          }
-
-          if (Number(slider.value) < -max) {
-            slider.value = String(-max);
-          }
-        });
-
-      channel.querySelector(".scale").innerHTML =
-        "<span>+" + max + " dB</span>" +
-        "<span>0 dB</span>" +
-        "<span>-" + max + " dB</span>";
-
-      updateValues(channel);
-    }
-
-    function updateValues(channel) {
-      const gain = channel.querySelector(".gain");
-      const gainValue = channel.querySelector(".gain-value");
-
-      if (gain && gainValue) {
-        gainValue.textContent =
-          Number(gain.value).toFixed(1) + " dB";
-      }
-
-      channel.querySelectorAll(".band").forEach(band => {
-        const slider = band.querySelector("input");
-        const value = band.querySelector(".band-value");
-
-        if (slider && value) {
-          value.textContent =
-            Number(slider.value).toFixed(1);
-        }
-      });
-
-      updateMeter(channel);
       syncAudioControlsFromUI();
+      updateMeter(channel);
+    });
+
+    band.append(
+      frequencyLabel,
+      slider,
+      value
+    );
+
+    eq.appendChild(band);
+  });
+}
+
+/* =========================================================
+   METER CADANGAN
+========================================================= */
+
+function updateMeter(channel) {
+  const meter = channel.querySelector(".meter");
+  const clip = channel.querySelector(".clip");
+
+  if (!meter || !clip) {
+    return;
+  }
+
+  const sliders = [
+    ...channel.querySelectorAll(".band input")
+  ];
+
+  const gainControl = channel.querySelector(".gain");
+
+  const gain = gainControl
+    ? Number(gainControl.value)
+    : 0;
+
+  const maximum = sliders.length
+    ? Math.max(
+        ...sliders.map(slider =>
+          Math.abs(Number(slider.value))
+        )
+      )
+    : 0;
+
+  const level = Math.min(
+    10,
+    Math.round((maximum + Math.abs(gain)) / 3)
+  );
+
+  meter.innerHTML = "";
+
+  for (let index = 0; index < 10; index++) {
+    const segment = document.createElement("span");
+
+    if (index < level) {
+      segment.classList.add("on");
     }
 
-    /*
-    =========================================================
-    PRESET
-    =========================================================
-    */
+    meter.appendChild(segment);
+  }
 
-    function setPreset(type) {
-      channels.forEach(channel => {
-        const gain = channel.querySelector(".gain");
+  clip.classList.toggle("on", level >= 10);
+}
 
-        gain.value = "0";
+/* =========================================================
+   AUDIO ENGINE
+========================================================= */
 
-        channel
-          .querySelectorAll(".band input")
-          .forEach((slider, index) => {
-            let value = 0;
+let audioContext = null;
 
-            if (type === "vocal") {
-              if (index >= 13 && index <= 21) {
-                value = 3;
-              }
+let microphoneStream = null;
+let activeSource = null;
+let microphoneSource = null;
+let audioElementSource = null;
 
-              if (index <= 5) {
-                value = -2;
-              }
+let splitterNode = null;
+let mergerNode = null;
+let masterGainNode = null;
+let outputMuteGainNode = null;
 
-              if (index >= 25) {
-                value = 2;
-              }
-            }
+let selectedInputDeviceId = "";
+let activeSourceType = "";
+let audioRunning = false;
+let audioGraphReady = false;
+let selectedAudioUrl = null;
+let meterAnimationId = null;
+let outputMuted = false;
 
-            if (type === "music") {
-              if (index <= 5) {
-                value = 4;
-              }
+const audioChannels = [
+  {
+    inputGain: null,
+    highPass: null,
+    filters: [],
+    analyser: null,
+    bypass: false
+  },
+  {
+    inputGain: null,
+    highPass: null,
+    filters: [],
+    analyser: null,
+    bypass: false
+  }
+];
 
-              if (index >= 23) {
-                value = 3;
-              }
+/* =========================================================
+   ELEMENT AUDIO
+========================================================= */
 
-              if (index >= 12 && index <= 18) {
-                value = -1;
-              }
-            }
+const audioFile =
+  document.getElementById("audioFile");
 
-            slider.value = String(value);
-          });
+const audioPlayer =
+  document.getElementById("audioPlayer");
 
-        updateValues(channel);
-      });
+const inputDeviceSelect =
+  document.getElementById("inputDeviceSelect");
 
-      setStatus(
-        "Preset " + type.toUpperCase() + " diterapkan."
+const refreshInputDevicesButton =
+  document.getElementById(
+    "refreshInputDevicesButton"
+  );
+
+const inputDeviceStatus =
+  document.getElementById("inputDeviceStatus");
+
+const startMicButton =
+  document.getElementById("startMicButton");
+
+const startAudioButton =
+  document.getElementById("startAudioButton");
+
+const stopAudioButton =
+  document.getElementById("stopAudioButton");
+
+const masterGainControl =
+  document.getElementById("masterGainControl");
+
+const masterGainValue =
+  document.getElementById("masterGainValue");
+
+const outputMode =
+  document.getElementById("outputMode");
+
+const muteOutputButton =
+  document.getElementById("muteOutputButton");
+
+/* =========================================================
+   AUDIO CONTEXT
+========================================================= */
+
+function createAudioContext() {
+  if (!audioContext) {
+    const AudioContextClass =
+      window.AudioContext ||
+      window.webkitAudioContext;
+
+    if (!AudioContextClass) {
+      throw new Error(
+        "Web Audio API tidak didukung browser ini."
       );
     }
 
-    /*
-    =========================================================
-    AUDIO ENGINE
-    =========================================================
-    */
+    audioContext = new AudioContextClass();
+  }
 
-    let audioContext = null;
-    let microphoneStream = null;
-    let activeSource = null;
-    let audioElementSource = null;
-    let selectedAudioUrl = null;
+  if (audioContext.state === "suspended") {
+    audioContext.resume();
+  }
 
-    let splitterNode = null;
-    let mergerNode = null;
-    let masterGainNode = null;
-    let outputMuteGainNode = null;
+  return audioContext;
+}
 
-    let audioRunning = false;
-    let meterAnimationId = null;
-    let audioGraphReady = false;
-    let activeSourceType = "";
+function dbToGain(db) {
+  return Math.pow(10, db / 20);
+}
 
-    const audioFile = document.getElementById("audioFile");
-    const audioPlayer = document.getElementById("audioPlayer");
+function getMasterGainDb() {
+  return Number(masterGainControl.value);
+}
 
-    const startMicButton =
-      document.getElementById("startMicButton");
+function getSafeMasterGainDb() {
+  const requestedDb = getMasterGainDb();
 
-    const startAudioButton =
-      document.getElementById("startAudioButton");
+  if (outputMode.value === "safe") {
+    return Math.min(requestedDb, -6);
+  }
 
-    const stopAudioButton =
-      document.getElementById("stopAudioButton");
+  return requestedDb;
+}
 
-    const masterGainControl =
-      document.getElementById("masterGainControl");
+/* =========================================================
+   MASTER DAN MUTE OUTPUT
+========================================================= */
 
-    const masterGainValue =
-      document.getElementById("masterGainValue");
+function updateMasterGain() {
+  const requestedDb = getMasterGainDb();
+  const appliedDb = getSafeMasterGainDb();
 
-    const outputMode =
-      document.getElementById("outputMode");
+  masterGainValue.textContent =
+    appliedDb.toFixed(0) + " dB";
 
-    const muteOutputButton =
-      document.getElementById("muteOutputButton");
+  if (masterGainNode && audioContext) {
+    masterGainNode.gain.setTargetAtTime(
+      dbToGain(appliedDb),
+      audioContext.currentTime,
+      0.01
+    );
+  }
 
-    let outputMuted = false;
+  if (outputMode.value === "safe") {
+    setFeedbackStatus(
+      "SAFE MODE aktif. Master dibatasi maksimal -6 dB. " +
+      "Gunakan headset saat menguji mikrofon."
+    );
+  } else {
+    setFeedbackStatus(
+      "NORMAL MODE aktif. Risiko feedback lebih tinggi. " +
+      "Turunkan volume sebelum menghubungkan speaker."
+    );
+  }
+}
 
-    const audioChannels = [
-      {
-        inputGain: null,
-        highPass: null,
-        filters: [],
-        analyser: null,
-        bypass: false
-      },
-      {
-        inputGain: null,
-        highPass: null,
-        filters: [],
-        analyser: null,
-        bypass: false
-      }
-    ];
+function updateOutputMute() {
+  if (outputMuteGainNode && audioContext) {
+    outputMuteGainNode.gain.setTargetAtTime(
+      outputMuted ? 0 : 1,
+      audioContext.currentTime,
+      0.01
+    );
+  }
 
-    function createAudioContext() {
-      if (!audioContext) {
-        const AudioContextClass =
-          window.AudioContext ||
-          window.webkitAudioContext;
+  muteOutputButton.textContent =
+    outputMuted
+      ? "UNMUTE OUTPUT"
+      : "MUTE OUTPUT";
 
-        if (!AudioContextClass) {
-          throw new Error(
-            "Web Audio API tidak didukung browser ini."
-          );
-        }
+  muteOutputButton.classList.toggle(
+    "active",
+    outputMuted
+  );
 
-        audioContext = new AudioContextClass();
-      }
+  setAudioStatus(
+    outputMuted
+      ? "Output dimute. Proses EQ tetap berjalan."
+      : "Output aktif."
+  );
+}
 
-      if (audioContext.state === "suspended") {
-        audioContext.resume();
-      }
+/* =========================================================
+   INPUT DEVICE
+========================================================= */
 
-      return audioContext;
+async function refreshInputDevices() {
+  if (
+    !navigator.mediaDevices ||
+    !navigator.mediaDevices.enumerateDevices
+  ) {
+    inputDeviceStatus.textContent =
+      "Browser tidak mendukung daftar perangkat audio.";
+
+    return;
+  }
+
+  try {
+    const devices =
+      await navigator.mediaDevices.enumerateDevices();
+
+    const inputDevices = devices.filter(
+      device => device.kind === "audioinput"
+    );
+
+    const previousValue =
+      selectedInputDeviceId ||
+      inputDeviceSelect.value;
+
+    inputDeviceSelect.innerHTML = "";
+
+    const defaultOption =
+      document.createElement("option");
+
+    defaultOption.value = "";
+    defaultOption.textContent =
+      "Default microphone";
+
+    inputDeviceSelect.appendChild(
+      defaultOption
+    );
+
+    inputDevices.forEach((device, index) => {
+      const option =
+        document.createElement("option");
+
+      option.value = device.deviceId;
+
+      option.textContent =
+        device.label ||
+        "Audio input " + (index + 1);
+
+      inputDeviceSelect.appendChild(option);
+    });
+
+    if (
+      inputDevices.some(
+        device =>
+          device.deviceId === previousValue
+      )
+    ) {
+      inputDeviceSelect.value =
+        previousValue;
     }
 
-    function dbToGain(db) {
-      return Math.pow(10, db / 20);
-    }
+    selectedInputDeviceId =
+      inputDeviceSelect.value;
 
-    function getMasterGainDb() {
-      return Number(masterGainControl.value);
-    }
+    inputDeviceStatus.textContent =
+      inputDevices.length +
+      " perangkat input ditemukan.";
 
-    function getSafeMasterGainDb() {
-      const selectedMode = outputMode.value;
-      const requestedDb = getMasterGainDb();
+  } catch (error) {
+    console.error(error);
 
-      if (selectedMode === "safe") {
-        return Math.min(requestedDb, -6);
-      }
+    inputDeviceStatus.textContent =
+      "Daftar perangkat gagal dibaca. " +
+      "Pastikan izin mikrofon diberikan.";
+  }
+}
 
-      return requestedDb;
-    }
+inputDeviceSelect.addEventListener(
+  "change",
+  event => {
+    selectedInputDeviceId =
+      event.target.value;
 
-    function updateMasterGain() {
-      const requestedDb = getMasterGainDb();
-      const appliedDb = getSafeMasterGainDb();
+    setStatus(
+      selectedInputDeviceId
+        ? "Perangkat input dipilih."
+        : "Input default dipilih."
+    );
+  }
+);
 
-      masterGainValue.textContent =
-        appliedDb.toFixed(0) + " dB";
+refreshInputDevicesButton.addEventListener(
+  "click",
+  refreshInputDevices
+);
 
-      if (masterGainNode && audioContext) {
-        masterGainNode.gain.setTargetAtTime(
-          dbToGain(appliedDb),
-          audioContext.currentTime,
-          0.01
-        );
-      }
+if (
+  navigator.mediaDevices &&
+  navigator.mediaDevices.addEventListener
+) {
+  navigator.mediaDevices.addEventListener(
+    "devicechange",
+    refreshInputDevices
+  );
+}
 
-      if (outputMode.value === "safe") {
-        setFeedbackStatus(
-          "SAFE MODE aktif. Master dibatasi maksimal -6 dB. " +
-          "Gunakan headset saat menguji mikrofon."
-        );
-      } else {
-        setFeedbackStatus(
-          "NORMAL MODE aktif. Risiko feedback lebih tinggi. " +
-          "Turunkan volume sebelum menghubungkan speaker."
-        );
-      }
-    }
+/* =========================================================
+   MEMBANGUN CHANNEL EQ
+========================================================= */
 
-    function updateOutputMute() {
-      if (!outputMuteGainNode || !audioContext) {
+function buildEqualizerChannel(channelIndex) {
+  const channel = channels[channelIndex];
+
+  const gainControl =
+    channel.querySelector(".gain");
+
+  const hpfControl =
+    channel.querySelector(".hpf");
+
+  const bypassButton =
+    channel.querySelector(".bypass-button");
+
+  const bandControls = [
+    ...channel.querySelectorAll(
+      ".band input[type='range']"
+    )
+  ];
+
+  const inputGain =
+    audioContext.createGain();
+
+  const highPass =
+    audioContext.createBiquadFilter();
+
+  const analyser =
+    audioContext.createAnalyser();
+
+  inputGain.gain.value =
+    dbToGain(Number(gainControl.value));
+
+  highPass.type = "highpass";
+
+  highPass.frequency.value =
+    hpfControl.value === "off"
+      ? 20
+      : Number(hpfControl.value);
+
+  highPass.Q.value = 0.707;
+
+  analyser.fftSize = 1024;
+  analyser.smoothingTimeConstant = 0.75;
+
+  inputGain.connect(highPass);
+
+  let previousNode = highPass;
+  const filters = [];
+
+  bandControls.forEach((control, index) => {
+    const filter =
+      audioContext.createBiquadFilter();
+
+    filter.type = "peaking";
+    filter.frequency.value = frequencies[index];
+    filter.Q.value = 1.4;
+    filter.gain.value = Number(control.value);
+
+    previousNode.connect(filter);
+    previousNode = filter;
+
+    filters.push(filter);
+  });
+
+  previousNode.connect(analyser);
+
+  audioChannels[channelIndex] = {
+    inputGain,
+    highPass,
+    filters,
+    analyser,
+    bypass: bypassButton.classList.contains("active")
+  };
+
+  gainControl.addEventListener("input", () => {
+    inputGain.gain.setTargetAtTime(
+      dbToGain(Number(gainControl.value)),
+      audioContext.currentTime,
+      0.01
+    );
+  });
+
+  hpfControl.addEventListener("change", () => {
+    highPass.frequency.setTargetAtTime(
+      hpfControl.value === "off"
+        ? 20
+        : Number(hpfControl.value),
+      audioContext.currentTime,
+      0.01
+    );
+  });
+
+  bandControls.forEach((control, index) => {
+    control.addEventListener("input", () => {
+      if (audioChannels[channelIndex].bypass) {
         return;
       }
 
-      outputMuteGainNode.gain.setTargetAtTime(
-        outputMuted ? 0 : 1,
+      filters[index].gain.setTargetAtTime(
+        Number(control.value),
         audioContext.currentTime,
         0.01
       );
+    });
+  });
 
-      muteOutputButton.textContent =
-        outputMuted ? "UNMUTE OUTPUT" : "MUTE OUTPUT";
+  return audioChannels[channelIndex];
+}
 
-      muteOutputButton.classList.toggle(
-        "active",
-        outputMuted
+/* =========================================================
+   MEMBANGUN AUDIO GRAPH
+========================================================= */
+
+function initializeAudioGraph() {
+  createAudioContext();
+
+  if (audioGraphReady) {
+    updateMasterGain();
+    updateOutputMute();
+    return;
+  }
+
+  buildEqualizerChannel(0);
+  buildEqualizerChannel(1);
+
+  splitterNode =
+    audioContext.createChannelSplitter(2);
+
+  mergerNode =
+    audioContext.createChannelMerger(2);
+
+  masterGainNode =
+    audioContext.createGain();
+
+  outputMuteGainNode =
+    audioContext.createGain();
+
+  masterGainNode.gain.value =
+    dbToGain(getSafeMasterGainDb());
+
+  outputMuteGainNode.gain.value =
+    outputMuted ? 0 : 1;
+
+  audioChannels[0].analyser.connect(
+    mergerNode,
+    0,
+    0
+  );
+
+  audioChannels[1].analyser.connect(
+    mergerNode,
+    0,
+    1
+  );
+
+  mergerNode.connect(masterGainNode);
+  masterGainNode.connect(outputMuteGainNode);
+  outputMuteGainNode.connect(
+    audioContext.destination
+  );
+
+  audioGraphReady = true;
+
+  updateMasterGain();
+  updateOutputMute();
+  startRealMeters();
+}
+
+/* =========================================================
+   MEMUTUS AUDIO SOURCE
+========================================================= */
+
+function disconnectCurrentSource() {
+  if (activeSource) {
+    try {
+      activeSource.disconnect();
+    } catch (error) {
+      console.warn(
+        "Sumber audio sudah terputus.",
+        error
       );
+    }
 
+    activeSource = null;
+  }
+
+  if (splitterNode) {
+    try {
+      splitterNode.disconnect();
+    } catch (error) {
+      console.warn(
+        "Splitter sudah terputus.",
+        error
+      );
+    }
+  }
+
+  if (microphoneStream) {
+    microphoneStream
+      .getTracks()
+      .forEach(track => track.stop());
+
+    microphoneStream = null;
+  }
+
+  microphoneSource = null;
+  audioRunning = false;
+  activeSourceType = "";
+}
+
+/* =========================================================
+   HUBUNGKAN SOURCE KE EQ
+========================================================= */
+
+function connectAudioSource(source, sourceType) {
+  initializeAudioGraph();
+  disconnectCurrentSource();
+
+  activeSource = source;
+  activeSourceType = sourceType;
+
+  source.connect(splitterNode);
+
+  const channelCount =
+    source.channelCount || 2;
+
+  if (channelCount <= 1) {
+    splitterNode.connect(
+      audioChannels[0].inputGain,
+      0
+    );
+
+    splitterNode.connect(
+      audioChannels[1].inputGain,
+      0
+    );
+  } else {
+    splitterNode.connect(
+      audioChannels[0].inputGain,
+      0
+    );
+
+    splitterNode.connect(
+      audioChannels[1].inputGain,
+      1
+    );
+  }
+
+  audioRunning = true;
+
+  setAudioStatus(
+    sourceType +
+    " aktif. Audio melewati EQ Channel 1 dan Channel 2."
+  );
+}
+
+/* =========================================================
+   FILE AUDIO
+========================================================= */
+
+audioFile.addEventListener("change", event => {
+  const file = event.target.files[0];
+
+  if (!file) {
+    return;
+  }
+
+  try {
+    createAudioContext();
+    initializeAudioGraph();
+
+    if (!audioElementSource) {
+      audioElementSource =
+        audioContext.createMediaElementSource(
+          audioPlayer
+        );
+    }
+
+    if (selectedAudioUrl) {
+      URL.revokeObjectURL(selectedAudioUrl);
+    }
+
+    selectedAudioUrl =
+      URL.createObjectURL(file);
+
+    audioPlayer.pause();
+    audioPlayer.src = selectedAudioUrl;
+    audioPlayer.load();
+
+    connectAudioSource(
+      audioElementSource,
+      "File audio"
+    );
+
+    setAudioStatus(
+      "File audio siap. Tekan START AUDIO untuk memutar."
+    );
+
+    setStatus(
+      "File audio berhasil dimuat."
+    );
+
+  } catch (error) {
+    console.error(error);
+
+    setAudioStatus(
+      "File audio gagal diproses oleh Web Audio API."
+    );
+
+    setStatus(
+      "Gagal memuat file audio."
+    );
+  }
+});
+
+/* =========================================================
+   START FILE AUDIO
+========================================================= */
+
+startAudioButton.addEventListener(
+  "click",
+  async () => {
+    if (!audioPlayer.src) {
       setAudioStatus(
-        outputMuted
-          ? "Output dimute. Proses EQ tetap berjalan."
-          : "Output aktif."
+        "Pilih file audio terlebih dahulu."
       );
+
+      return;
     }
 
-    /*
-    =========================================================
-    MEMBANGUN SATU CHANNEL EQ
-    =========================================================
-    */
-
-    function buildEqualizerChannel(channelIndex) {
-      const channel = channels[channelIndex];
-
-      const gainControl = channel.querySelector(".gain");
-      const hpfControl = channel.querySelector(".hpf");
-      const bypassButton =
-        channel.querySelector(".bypass-button");
-
-      const bandControls = [
-        ...channel.querySelectorAll(
-          ".band input[type='range']"
-        )
-      ];
-
-      const inputGain = audioContext.createGain();
-      const highPass = audioContext.createBiquadFilter();
-      const analyser = audioContext.createAnalyser();
-
-      inputGain.gain.value =
-        dbToGain(Number(gainControl.value));
-
-      highPass.type = "highpass";
-      highPass.frequency.value =
-        hpfControl.value === "off"
-          ? 20
-          : Number(hpfControl.value);
-
-      highPass.Q.value = 0.707;
-
-      analyser.fftSize = 1024;
-      analyser.smoothingTimeConstant = 0.75;
-
-      inputGain.connect(highPass);
-
-      let previousNode = highPass;
-      const filters = [];
-
-      bandControls.forEach((control, index) => {
-        const filter = audioContext.createBiquadFilter();
-
-        filter.type = "peaking";
-        filter.frequency.value = frequencies[index];
-        filter.Q.value = 1.4;
-        filter.gain.value =
-          Number(control.value);
-
-        previousNode.connect(filter);
-        previousNode = filter;
-        filters.push(filter);
-      });
-
-      previousNode.connect(analyser);
-
-      audioChannels[channelIndex] = {
-        inputGain,
-        highPass,
-        filters,
-        analyser,
-        bypass: bypassButton.classList.contains("active")
-      };
-
-      gainControl.addEventListener("input", () => {
-        inputGain.gain.setTargetAtTime(
-          dbToGain(Number(gainControl.value)),
-          audioContext.currentTime,
-          0.01
-        );
-      });
-
-      hpfControl.addEventListener("change", () => {
-        highPass.frequency.setTargetAtTime(
-          hpfControl.value === "off"
-            ? 20
-            : Number(hpfControl.value),
-          audioContext.currentTime,
-          0.01
-        );
-      });
-
-      bandControls.forEach((control, index) => {
-        control.addEventListener("input", () => {
-          if (audioChannels[channelIndex].bypass) {
-            return;
-          }
-
-          filters[index].gain.setTargetAtTime(
-            Number(control.value),
-            audioContext.currentTime,
-            0.01
-          );
-        });
-      });
-
-      return audioChannels[channelIndex];
-    }
-
-    /*
-    =========================================================
-    MEMBANGUN GRAPH AUDIO SATU KALI
-    =========================================================
-    */
-
-    function initializeAudioGraph() {
+    try {
       createAudioContext();
-
-      if (audioGraphReady) {
-        updateMasterGain();
-        updateOutputMute();
-        return;
-      }
-
-      buildEqualizerChannel(0);
-      buildEqualizerChannel(1);
-
-      splitterNode =
-        audioContext.createChannelSplitter(2);
-
-      mergerNode =
-        audioContext.createChannelMerger(2);
-
-      masterGainNode =
-        audioContext.createGain();
-
-      outputMuteGainNode =
-        audioContext.createGain();
-
-      masterGainNode.gain.value =
-        dbToGain(getSafeMasterGainDb());
-
-      outputMuteGainNode.gain.value =
-        outputMuted ? 0 : 1;
-
-      /*
-      Jangan menghubungkan splitter ke EQ di sini.
-      Koneksi dibuat hanya ketika sumber audio aktif.
-      Hal ini mencegah koneksi ganda.
-      */
-
-      audioChannels[0].analyser.connect(
-        mergerNode,
-        0,
-        0
-      );
-
-      audioChannels[1].analyser.connect(
-        mergerNode,
-        0,
-        1
-      );
-
-      mergerNode.connect(masterGainNode);
-      masterGainNode.connect(outputMuteGainNode);
-      outputMuteGainNode.connect(
-        audioContext.destination
-      );
-
-      audioGraphReady = true;
-
-      updateMasterGain();
-      updateOutputMute();
-      startRealMeters();
-    }
-
-    /*
-    =========================================================
-    MEMUTUS SUMBER AUDIO AKTIF
-    =========================================================
-    */
-
-    function disconnectCurrentSource() {
-      if (activeSource) {
-        try {
-          activeSource.disconnect();
-        } catch (error) {
-          console.warn(
-            "Sumber audio sudah terputus.",
-            error
-          );
-        }
-
-        activeSource = null;
-      }
-
-      if (splitterNode) {
-        try {
-          splitterNode.disconnect();
-        } catch (error) {
-          console.warn(
-            "Splitter sudah terputus.",
-            error
-          );
-        }
-      }
-
-      if (microphoneStream) {
-        microphoneStream
-          .getTracks()
-          .forEach(track => track.stop());
-
-        microphoneStream = null;
-      }
-
-      audioRunning = false;
-      activeSourceType = "";
-    }
-
-    /*
-    =========================================================
-    MENGHUBUNGKAN SUMBER KE DUA CHANNEL EQ
-    =========================================================
-    */
-
-    function connectAudioSource(source, sourceType) {
       initializeAudioGraph();
-      disconnectCurrentSource();
 
-      activeSource = source;
-      activeSourceType = sourceType;
-
-      /*
-      Setiap sumber hanya disambungkan sekali ke splitter.
-      */
-
-      source.connect(splitterNode);
-
-      /*
-      Sumber mono disalurkan ke kedua channel.
-      Sumber stereo:
-      channel 0 -> EQ 1
-      channel 1 -> EQ 2
-      */
-
-      const channelCount = source.channelCount || 2;
-
-      if (channelCount <= 1) {
-        splitterNode.connect(
-          audioChannels[0].inputGain,
-          0
-        );
-
-        splitterNode.connect(
-          audioChannels[1].inputGain,
-          0
-        );
-      } else {
-        splitterNode.connect(
-          audioChannels[0].inputGain,
-          0
-        );
-
-        splitterNode.connect(
-          audioChannels[1].inputGain,
-          1
-        );
+      if (audioContext.state === "suspended") {
+        await audioContext.resume();
       }
 
-      audioRunning = true;
-
-      setAudioStatus(
-        sourceType +
-        " aktif. Audio melewati EQ Channel 1 dan Channel 2."
-      );
-    }
-
-    /*
-    =========================================================
-    INPUT FILE AUDIO
-    =========================================================
-    */
-
-    audioFile.addEventListener("change", event => {
-      const file = event.target.files[0];
-
-      if (!file) {
-        return;
+      if (!audioElementSource) {
+        audioElementSource =
+          audioContext.createMediaElementSource(
+            audioPlayer
+          );
       }
 
-      try {
-        createAudioContext();
-        initializeAudioGraph();
-
-        if (!audioElementSource) {
-          audioElementSource =
-            audioContext.createMediaElementSource(
-              audioPlayer
-            );
-        }
-
-        if (selectedAudioUrl) {
-          URL.revokeObjectURL(selectedAudioUrl);
-        }
-
-        selectedAudioUrl =
-          URL.createObjectURL(file);
-
-        audioPlayer.pause();
-        audioPlayer.src = selectedAudioUrl;
-        audioPlayer.load();
-
+      if (activeSource !== audioElementSource) {
         connectAudioSource(
           audioElementSource,
           "File audio"
         );
+      }
 
+      await audioPlayer.play();
+
+      audioRunning = true;
+
+      setAudioStatus(
+        "File audio sedang diputar melalui EQ."
+      );
+
+    } catch (error) {
+      console.error(error);
+
+      setAudioStatus(
+        "Pemutaran audio gagal. Tekan START AUDIO kembali."
+      );
+    }
+  }
+);
+
+/* =========================================================
+   INPUT MICROPHONE
+========================================================= */
+
+startMicButton.addEventListener(
+  "click",
+  async () => {
+    try {
+      createAudioContext();
+      initializeAudioGraph();
+
+      if (
+        !navigator.mediaDevices ||
+        !navigator.mediaDevices.getUserMedia
+      ) {
         setAudioStatus(
-          "File audio siap. Tekan START AUDIO untuk memutar."
+          "Browser tidak mendukung akses mikrofon."
         );
 
-        setStatus(
-          "File audio berhasil dimuat."
-        );
-      } catch (error) {
-        console.error(error);
+        return;
+      }
 
-        setAudioStatus(
-          "File audio gagal diproses oleh Web Audio API."
+      disconnectCurrentSource();
+
+      const audioConstraints = {
+        channelCount: 1,
+        echoCancellation: false,
+        noiseSuppression: false,
+        autoGainControl: false
+      };
+
+      if (selectedInputDeviceId) {
+        audioConstraints.deviceId = {
+          exact: selectedInputDeviceId
+        };
+      }
+
+      microphoneStream =
+        await navigator.mediaDevices.getUserMedia({
+          audio: audioConstraints
+        });
+
+      microphoneSource =
+        audioContext.createMediaStreamSource(
+          microphoneStream
         );
 
-        setStatus(
-          "Gagal memuat file audio."
+      connectAudioSource(
+        microphoneSource,
+        "Mikrofon"
+      );
+
+      await refreshInputDevices();
+
+      setAudioStatus(
+        "Mikrofon aktif. Gunakan headset untuk mencegah feedback."
+      );
+
+      setStatus(
+        "Input mikrofon aktif."
+      );
+
+    } catch (error) {
+      console.error(error);
+
+      setAudioStatus(
+        "Mikrofon tidak dapat digunakan. " +
+        "Periksa izin mikrofon dan gunakan HTTPS."
+      );
+
+      setStatus(
+        "Akses mikrofon gagal."
+      );
+    }
+  }
+);
+
+/* =========================================================
+   STOP AUDIO
+========================================================= */
+
+stopAudioButton.addEventListener(
+  "click",
+  () => {
+    if (audioPlayer) {
+      audioPlayer.pause();
+      audioPlayer.currentTime = 0;
+    }
+
+    disconnectCurrentSource();
+
+    setAudioStatus(
+      "Audio dihentikan. Input mikrofon dan file diputus."
+    );
+
+    setStatus(
+      "Audio berhenti."
+    );
+  }
+);
+
+/* =========================================================
+   METER AUDIO NYATA
+========================================================= */
+
+function startRealMeters() {
+  if (meterAnimationId) {
+    return;
+  }
+
+  const meterBuffers = [
+    new Uint8Array(1024),
+    new Uint8Array(1024)
+  ];
+
+  function updateRealMeters() {
+    meterAnimationId =
+      requestAnimationFrame(updateRealMeters);
+
+    audioChannels.forEach(
+      (audioChannel, index) => {
+        const channel = channels[index];
+
+        if (!audioChannel.analyser) {
+          return;
+        }
+
+        const meter =
+          channel.querySelector(".meter");
+
+        const clip =
+          channel.querySelector(".clip");
+
+        const buffer =
+          meterBuffers[index];
+
+        audioChannel.analyser
+          .getByteTimeDomainData(buffer);
+
+        let peak = 0;
+
+        for (
+          let bufferIndex = 0;
+          bufferIndex < buffer.length;
+          bufferIndex++
+        ) {
+          const normalized =
+            Math.abs(
+              buffer[bufferIndex] - 128
+            ) / 128;
+
+          if (normalized > peak) {
+            peak = normalized;
+          }
+        }
+
+        const db =
+          peak > 0
+            ? 20 * Math.log10(peak)
+            : -60;
+
+        const level = Math.max(
+          0,
+          Math.min(
+            10,
+            Math.round(((db + 60) / 60) * 10)
+          )
         );
+
+        meter.innerHTML = "";
+
+        for (
+          let segmentIndex = 0;
+          segmentIndex < 10;
+          segmentIndex++
+        ) {
+          const segment =
+            document.createElement("span");
+
+          if (segmentIndex < level) {
+            segment.classList.add("on");
+          }
+
+          meter.appendChild(segment);
+        }
+
+        clip.classList.toggle(
+          "on",
+          peak >= 0.98
+        );
+      }
+    );
+  }
+
+  updateRealMeters();
+}
+
+/* =========================================================
+   SINKRONISASI UI KE AUDIO GRAPH
+========================================================= */
+
+function syncAudioControlsFromUI() {
+  if (!audioGraphReady || !audioContext) {
+    return;
+  }
+
+  channels.forEach((channel, index) => {
+    const audioChannel = audioChannels[index];
+
+    if (!audioChannel.inputGain) {
+      return;
+    }
+
+    const gainControl =
+      channel.querySelector(".gain");
+
+    const hpfControl =
+      channel.querySelector(".hpf");
+
+    const bypassButton =
+      channel.querySelector(".bypass-button");
+
+    const bandControls = [
+      ...channel.querySelectorAll(
+        ".band input[type='range']"
+      )
+    ];
+
+    audioChannel.inputGain.gain.setTargetAtTime(
+      dbToGain(Number(gainControl.value)),
+      audioContext.currentTime,
+      0.01
+    );
+
+    audioChannel.highPass.frequency.setTargetAtTime(
+      hpfControl.value === "off"
+        ? 20
+        : Number(hpfControl.value),
+      audioContext.currentTime,
+      0.01
+    );
+
+    audioChannel.bypass =
+      bypassButton.classList.contains("active");
+
+    audioChannel.filters.forEach(
+      (filter, bandIndex) => {
+        if (!bandControls[bandIndex]) {
+          return;
+        }
+
+        filter.gain.setTargetAtTime(
+          audioChannel.bypass
+            ? 0
+            : Number(bandControls[bandIndex].value),
+          audioContext.currentTime,
+          0.01
+        );
+      }
+    );
+  });
+}
+
+/* =========================================================
+   RANGE DAN NILAI
+========================================================= */
+
+function updateValues(channel) {
+  const gain =
+    channel.querySelector(".gain");
+
+  const gainValue =
+    channel.querySelector(".gain-value");
+
+  if (gain && gainValue) {
+    gainValue.textContent =
+      Number(gain.value).toFixed(1) + " dB";
+  }
+
+  channel.querySelectorAll(".band").forEach(band => {
+    const slider = band.querySelector("input");
+    const value = band.querySelector(".band-value");
+
+    if (slider && value) {
+      value.textContent =
+        Number(slider.value).toFixed(1);
+    }
+  });
+
+  updateMeter(channel);
+  syncAudioControlsFromUI();
+}
+
+function setRange(channel, range) {
+  const max = Number(range);
+
+  channel
+    .querySelectorAll(".band input")
+    .forEach(slider => {
+      slider.min = String(-max);
+      slider.max = String(max);
+
+      if (Number(slider.value) > max) {
+        slider.value = String(max);
+      }
+
+      if (Number(slider.value) < -max) {
+        slider.value = String(-max);
       }
     });
 
-    /*
-    =========================================================
-    START FILE AUDIO
-    =========================================================
-    */
+  channel.querySelector(".scale").innerHTML =
+    "<span>+" + max + " dB</span>" +
+    "<span>0 dB</span>" +
+    "<span>-" + max + " dB</span>";
 
-    startAudioButton.addEventListener(
-      "click",
-      async () => {
-        if (!audioPlayer.src) {
-          setAudioStatus(
-            "Pilih file audio terlebih dahulu."
-          );
+  updateValues(channel);
+}
 
-          return;
+/* =========================================================
+   PRESET
+========================================================= */
+
+function setPreset(type) {
+  channels.forEach(channel => {
+    const gain =
+      channel.querySelector(".gain");
+
+    gain.value = "0";
+
+    channel
+      .querySelectorAll(".band input")
+      .forEach((slider, index) => {
+        let value = 0;
+
+        if (type === "vocal") {
+          if (index >= 13 && index <= 21) {
+            value = 3;
+          }
+
+          if (index <= 5) {
+            value = -2;
+          }
+
+          if (index >= 25) {
+            value = 2;
+          }
         }
 
-        try {
-          createAudioContext();
-          initializeAudioGraph();
-
-          if (audioContext.state === "suspended") {
-            await audioContext.resume();
+        if (type === "music") {
+          if (index <= 5) {
+            value = 4;
           }
 
-          if (!audioElementSource) {
-            audioElementSource =
-              audioContext.createMediaElementSource(
-                audioPlayer
-              );
+          if (index >= 23) {
+            value = 3;
           }
 
-          if (
-            activeSource !== audioElementSource
-          ) {
-            connectAudioSource(
-              audioElementSource,
-              "File audio"
-            );
+          if (index >= 12 && index <= 18) {
+            value = -1;
           }
-
-          await audioPlayer.play();
-
-          audioRunning = true;
-
-          setAudioStatus(
-            "File audio sedang diputar melalui EQ."
-          );
-        } catch (error) {
-          console.error(error);
-
-          setAudioStatus(
-            "Pemutaran audio gagal. Tekan START AUDIO kembali."
-          );
         }
-      }
+
+        slider.value = String(value);
+      });
+
+    updateValues(channel);
+  });
+
+  setStatus(
+    "Preset " + type.toUpperCase() + " diterapkan."
+  );
+}
+
+/* =========================================================
+   KONTROL CHANNEL
+========================================================= */
+
+channels.forEach(channel => {
+  createBands(channel);
+
+  channel
+    .querySelector(".gain")
+    .addEventListener("input", () => {
+      updateValues(channel);
+    });
+
+  channel
+    .querySelector(".range")
+    .addEventListener("change", event => {
+      setRange(
+        channel,
+        event.target.value
+      );
+    });
+
+  channel
+    .querySelector(".bypass-button")
+    .addEventListener("click", event => {
+      const button = event.currentTarget;
+
+      button.classList.toggle("active");
+
+      const bypassed =
+        button.classList.contains("active");
+
+      channel
+        .querySelectorAll(
+          ".gain, .hpf, .range, .band input"
+        )
+        .forEach(control => {
+          control.disabled = bypassed;
+        });
+
+      button.disabled = false;
+
+      syncAudioControlsFromUI();
+
+      setStatus(
+        bypassed
+          ? "Bypass channel aktif."
+          : "Bypass channel nonaktif."
+      );
+    });
+
+  channel
+    .querySelector(".test-button")
+    .addEventListener("click", event => {
+      const button = event.currentTarget;
+
+      button.classList.toggle("active");
+
+      const testing =
+        button.classList.contains("active");
+
+      channel.querySelector(".gain").value =
+        testing ? "6" : "0";
+
+      channel
+        .querySelectorAll(".band input")
+        .forEach(slider => {
+          slider.value = testing ? "2" : "0";
+        });
+
+      updateValues(channel);
+
+      setStatus(
+        testing
+          ? "Test signal UI aktif."
+          : "Test signal UI nonaktif."
+      );
+    });
+
+  updateValues(channel);
+});
+
+/* =========================================================
+   PRESET BUTTON
+========================================================= */
+
+document
+  .getElementById("flatButton")
+  .addEventListener("click", () => {
+    setPreset("flat");
+  });
+
+document
+  .getElementById("vocalButton")
+  .addEventListener("click", () => {
+    setPreset("vocal");
+  });
+
+document
+  .getElementById("musicButton")
+  .addEventListener("click", () => {
+    setPreset("music");
+  });
+
+/* =========================================================
+   SAVE
+========================================================= */
+
+document
+  .getElementById("saveButton")
+  .addEventListener("click", () => {
+    const data = channels.map(channel => ({
+      gain: channel.querySelector(".gain").value,
+      hpf: channel.querySelector(".hpf").value,
+      range: channel.querySelector(".range").value,
+
+      bypass:
+        channel
+          .querySelector(".bypass-button")
+          .classList.contains("active"),
+
+      bands: [
+        ...channel.querySelectorAll(".band input")
+      ].map(slider => slider.value)
+    }));
+
+    localStorage.setItem(
+      "equalizer-settings",
+      JSON.stringify(data)
     );
 
-    /*
-    =========================================================
-    INPUT MICROPHONE
-    =========================================================
-    */
-
-    startMicButton.addEventListener(
-      "click",
-      async () => {
-        try {
-          createAudioContext();
-          initializeAudioGraph();
-
-          if (
-            !navigator.mediaDevices ||
-            !navigator.mediaDevices.getUserMedia
-          ) {
-            setAudioStatus(
-              "Browser tidak mendukung akses mikrofon."
-            );
-
-            return;
-          }
-
-          disconnectCurrentSource();
-
-          microphoneStream =
-            await navigator.mediaDevices.getUserMedia({
-              audio: {
-                channelCount: 1,
-                echoCancellation: false,
-                noiseSuppression: false,
-                autoGainControl: false
-              }
-            });
-
-          const microphoneSource =
-            audioContext.createMediaStreamSource(
-              microphoneStream
-            );
-
-          connectAudioSource(
-            microphoneSource,
-            "Mikrofon"
-          );
-
-          setAudioStatus(
-            "Mikrofon aktif. Gunakan headset untuk mencegah feedback."
-          );
-
-          setStatus(
-            "Input mikrofon aktif."
-          );
-        } catch (error) {
-          console.error(error);
-
-          setAudioStatus(
-            "Mikrofon tidak dapat digunakan. " +
-            "Periksa izin mikrofon dan gunakan HTTPS."
-          );
-
-          setStatus(
-            "Akses mikrofon gagal."
-          );
-        }
-      }
+    setStatus(
+      "Setting berhasil disimpan di perangkat."
     );
+  });
 
-    /*
-    =========================================================
-    STOP AUDIO
-    =========================================================
-    */
+/* =========================================================
+   RECALL
+========================================================= */
 
-    stopAudioButton.addEventListener(
-      "click",
-      () => {
-        if (audioPlayer) {
-          audioPlayer.pause();
-          audioPlayer.currentTime = 0;
-        }
+document
+  .getElementById("loadButton")
+  .addEventListener("click", () => {
+    const saved =
+      localStorage.getItem("equalizer-settings");
 
-        disconnectCurrentSource();
+    if (!saved) {
+      setStatus(
+        "Belum ada setting yang tersimpan."
+      );
 
-        setAudioStatus(
-          "Audio dihentikan. Input mikrofon dan file diputus."
-        );
-
-        setStatus(
-          "Audio berhenti."
-        );
-      }
-    );
-
-    /*
-    =========================================================
-    METER AUDIO NYATA
-    =========================================================
-    */
-
-    function startRealMeters() {
-      if (meterAnimationId) {
-        return;
-      }
-
-      const meterBuffers = [
-        new Uint8Array(1024),
-        new Uint8Array(1024)
-      ];
-
-      function updateRealMeters() {
-        meterAnimationId =
-          requestAnimationFrame(updateRealMeters);
-
-        audioChannels.forEach(
-          (audioChannel, index) => {
-            const channel = channels[index];
-
-            if (!audioChannel.analyser) {
-              return;
-            }
-
-            const meter =
-              channel.querySelector(".meter");
-
-            const clip =
-              channel.querySelector(".clip");
-
-            const buffer = meterBuffers[index];
-
-            audioChannel.analyser
-              .getByteTimeDomainData(buffer);
-
-            let peak = 0;
-
-            for (
-              let bufferIndex = 0;
-              bufferIndex < buffer.length;
-              bufferIndex++
-            ) {
-              const normalized =
-                Math.abs(
-                  buffer[bufferIndex] - 128
-                ) / 128;
-
-              if (normalized > peak) {
-                peak = normalized;
-              }
-            }
-
-            const db =
-              peak > 0
-                ? 20 * Math.log10(peak)
-                : -60;
-
-            const level = Math.max(
-              0,
-              Math.min(
-                10,
-                Math.round(((db + 60) / 60) * 10)
-              )
-            );
-
-            meter.innerHTML = "";
-
-            for (
-              let segmentIndex = 0;
-              segmentIndex < 10;
-              segmentIndex++
-            ) {
-              const segment =
-                document.createElement("span");
-
-              if (segmentIndex < level) {
-                segment.classList.add("on");
-              }
-
-              meter.appendChild(segment);
-            }
-
-            const clipping = peak >= 0.98;
-
-            clip.classList.toggle(
-              "on",
-              clipping
-            );
-          }
-        );
-      }
-
-      updateRealMeters();
+      return;
     }
 
-    /*
-    =========================================================
-    SINKRONISASI UI DENGAN AUDIO GRAPH
-    =========================================================
-    */
-
-    function syncAudioControlsFromUI() {
-      if (!audioGraphReady || !audioContext) {
-        return;
-      }
+    try {
+      const data = JSON.parse(saved);
 
       channels.forEach((channel, index) => {
-        const audioChannel = audioChannels[index];
+        const item = data[index];
 
-        if (!audioChannel.inputGain) {
+        if (!item) {
           return;
         }
 
-        const gainControl =
-          channel.querySelector(".gain");
+        channel.querySelector(".gain").value =
+          item.gain ?? "0";
 
-        const hpfControl =
-          channel.querySelector(".hpf");
+        channel.querySelector(".hpf").value =
+          item.hpf ?? "off";
+
+        channel.querySelector(".range").value =
+          item.range ?? "15";
+
+        setRange(
+          channel,
+          item.range ?? "15"
+        );
+
+        channel
+          .querySelectorAll(".band input")
+          .forEach((slider, bandIndex) => {
+            slider.value =
+              item.bands?.[bandIndex] ?? "0";
+          });
 
         const bypassButton =
           channel.querySelector(".bypass-button");
 
-        const bandControls = [
-          ...channel.querySelectorAll(
-            ".band input[type='range']"
+        const bypassed =
+          Boolean(item.bypass);
+
+        bypassButton.classList.toggle(
+          "active",
+          bypassed
+        );
+
+        channel
+          .querySelectorAll(
+            ".gain, .hpf, .range, .band input"
           )
-        ];
+          .forEach(control => {
+            control.disabled = bypassed;
+          });
 
-        audioChannel.inputGain.gain.setTargetAtTime(
-          dbToGain(Number(gainControl.value)),
-          audioContext.currentTime,
-          0.01
-        );
+        bypassButton.disabled = false;
 
-        audioChannel.highPass.frequency.setTargetAtTime(
-          hpfControl.value === "off"
-            ? 20
-            : Number(hpfControl.value),
-          audioContext.currentTime,
-          0.01
-        );
-
-        audioChannel.bypass =
-          bypassButton.classList.contains("active");
-
-        audioChannel.filters.forEach(
-          (filter, bandIndex) => {
-            filter.gain.setTargetAtTime(
-              audioChannel.bypass
-                ? 0
-                : Number(bandControls[bandIndex].value),
-              audioContext.currentTime,
-              0.01
-            );
-          }
-        );
+        updateValues(channel);
       });
+
+      syncAudioControlsFromUI();
+
+      setStatus(
+        "Setting berhasil dipanggil kembali."
+      );
+
+    } catch (error) {
+      console.error(error);
+
+      setStatus(
+        "Data setting rusak atau tidak valid."
+      );
     }
+  });
 
-    /*
-    =========================================================
-    KONTROL CHANNEL
-    =========================================================
-    */
+/* =========================================================
+   RESET
+========================================================= */
 
+document
+  .getElementById("resetButton")
+  .addEventListener("click", () => {
     channels.forEach(channel => {
-      createBands(channel);
+      channel.querySelector(".gain").value =
+        "0";
+
+      channel.querySelector(".hpf").value =
+        "off";
+
+      channel.querySelector(".range").value =
+        "15";
 
       channel
-        .querySelector(".gain")
-        .addEventListener("input", () => {
-          updateValues(channel);
-        });
-
-      channel
-        .querySelector(".range")
-        .addEventListener("change", event => {
-          setRange(
-            channel,
-            event.target.value
-          );
+        .querySelectorAll(".band input")
+        .forEach(slider => {
+          slider.min = "-15";
+          slider.max = "15";
+          slider.value = "0";
+          slider.disabled = false;
         });
 
       channel
         .querySelector(".bypass-button")
-        .addEventListener("click", event => {
-          event.currentTarget.classList.toggle(
-            "active"
-          );
-
-          const bypassed =
-            event.currentTarget.classList.contains(
-              "active"
-            );
-
-          channel
-            .querySelectorAll("input, select")
-            .forEach(control => {
-              control.disabled = bypassed;
-            });
-
-          /*
-          Tombol bypass harus tetap bisa diklik.
-          */
-
-          event.currentTarget.disabled = false;
-
-          syncAudioControlsFromUI();
-
-          setStatus(
-            bypassed
-              ? "Bypass channel aktif."
-              : "Bypass channel nonaktif."
-          );
-        });
+        .classList.remove("active");
 
       channel
         .querySelector(".test-button")
-        .addEventListener("click", event => {
-          event.currentTarget.classList.toggle(
-            "active"
-          );
+        .classList.remove("active");
 
-          const testing =
-            event.currentTarget.classList.contains(
-              "active"
-            );
-
-          channel.querySelector(".gain").value =
-            testing ? "6" : "0";
-
-          channel
-            .querySelectorAll(".band input")
-            .forEach(slider => {
-              slider.value = testing ? "2" : "0";
-            });
-
-          updateValues(channel);
-
-          setStatus(
-            testing
-              ? "Test signal UI aktif."
-              : "Test signal UI nonaktif."
-          );
+      channel
+        .querySelectorAll(".gain, .hpf, .range")
+        .forEach(control => {
+          control.disabled = false;
         });
 
       updateValues(channel);
     });
 
-    /*
-    =========================================================
-    PRESET BUTTON
-    =========================================================
-    */
+    syncAudioControlsFromUI();
 
-    document
-      .getElementById("flatButton")
-      .addEventListener("click", () => {
-        setPreset("flat");
-      });
+    setStatus(
+      "Semua setting dikembalikan ke posisi awal."
+    );
+  });
 
-    document
-      .getElementById("vocalButton")
-      .addEventListener("click", () => {
-        setPreset("vocal");
-      });
+/* =========================================================
+   OUTPUT CONTROL
+========================================================= */
 
-    document
-      .getElementById("musicButton")
-      .addEventListener("click", () => {
-        setPreset("music");
-      });
+masterGainControl.addEventListener(
+  "input",
+  updateMasterGain
+);
 
-    /*
-    =========================================================
-    SAVE
-    =========================================================
-    */
+outputMode.addEventListener(
+  "change",
+  updateMasterGain
+);
 
-    document
-      .getElementById("saveButton")
-      .addEventListener("click", () => {
-        const data = channels.map(channel => ({
-          gain: channel.querySelector(".gain").value,
-          hpf: channel.querySelector(".hpf").value,
-          range: channel.querySelector(".range").value,
+muteOutputButton.addEventListener(
+  "click",
+  () => {
+    outputMuted = !outputMuted;
+    updateOutputMute();
+  }
+);
 
-          bypass:
-            channel
-              .querySelector(".bypass-button")
-              .classList.contains("active"),
+/* =========================================================
+   INISIALISASI
+========================================================= */
 
-          bands: [
-            ...channel.querySelectorAll(
-              ".band input"
-            )
-          ].map(slider => slider.value)
-        }));
+refreshInputDevices();
 
-        localStorage.setItem(
-          "equalizer-settings",
-          JSON.stringify(data)
-        );
+/* =========================================================
+   SERVICE WORKER
+========================================================= */
 
-        setStatus(
-          "Setting berhasil disimpan di perangkat."
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker
+      .register("sw.js")
+      .catch(error => {
+        console.log(
+          "Service worker belum aktif.",
+          error
         );
       });
-
-    /*
-    =========================================================
-    RECALL
-    =========================================================
-    */
-
-    document
-      .getElementById("loadButton")
-      .addEventListener("click", () => {
-        const saved =
-          localStorage.getItem(
-            "equalizer-settings"
-          );
-
-        if (!saved) {
-          setStatus(
-            "Belum ada setting yang tersimpan."
-          );
-
-          return;
-        }
-
-        try {
-          const data = JSON.parse(saved);
-
-          channels.forEach((channel, index) => {
-            const item = data[index];
-
-            if (!item) {
-              return;
-            }
-
-            channel.querySelector(".gain").value =
-              item.gain;
-
-            channel.querySelector(".hpf").value =
-              item.hpf;
-
-            channel.querySelector(".range").value =
-              item.range;
-
-            setRange(
-              channel,
-              item.range
-            );
-
-            channel
-              .querySelectorAll(".band input")
-              .forEach((slider, bandIndex) => {
-                slider.value =
-                  item.bands[bandIndex] ?? "0";
-              });
-
-            const bypassButton =
-              channel.querySelector(
-                ".bypass-button"
-              );
-
-            bypassButton.classList.toggle(
-              "active",
-              Boolean(item.bypass)
-            );
-
-            channel
-              .querySelectorAll("input, select")
-              .forEach(control => {
-                control.disabled =
-                  Boolean(item.bypass);
-              });
-
-            bypassButton.disabled = false;
-
-            updateValues(channel);
-          });
-
-          syncAudioControlsFromUI();
-
-          setStatus(
-            "Setting berhasil dipanggil kembali."
-          );
-        } catch (error) {
-          console.error(error);
-
-          setStatus(
-            "Data setting rusak atau tidak valid."
-          );
-        }
-      });
-
-    /*
-    =========================================================
-    RESET
-    =========================================================
-    */
-
-    document
-      .getElementById("resetButton")
-      .addEventListener("click", () => {
-        channels.forEach(channel => {
-          channel.querySelector(".gain").value =
-            "0";
-
-          channel.querySelector(".hpf").value =
-            "off";
-
-          channel.querySelector(".range").value =
-            "15";
-
-          channel
-            .querySelectorAll(".band input")
-            .forEach(slider => {
-              slider.min = "-15";
-              slider.max = "15";
-              slider.value = "0";
-            });
-
-          channel
-            .querySelector(".bypass-button")
-            .classList.remove("active");
-
-          channel
-            .querySelector(".test-button")
-            .classList.remove("active");
-
-          channel
-            .querySelectorAll("input, select")
-            .forEach(control => {
-              control.disabled = false;
-            });
-
-          updateValues(channel);
-        });
-
-        syncAudioControlsFromUI();
-
-        setStatus(
-          "Semua setting dikembalikan ke posisi awal."
-        );
-      });
-
-    /*
-    =========================================================
-    OUTPUT CONTROL
-    =========================================================
-    */
-
-    masterGainControl.addEventListener(
-      "input",
-      updateMasterGain
-    );
-
-    outputMode.addEventListener(
-      "change",
-      updateMasterGain
-    );
-
-    muteOutputButton.addEventListener(
-      "click",
-      () => {
-        outputMuted = !outputMuted;
-        updateOutputMute();
-      }
-    );
-
-    /*
-    =========================================================
-    SERVICE WORKER
-    =========================================================
-    */
-
-    if ("serviceWorker" in navigator) {
-      window.addEventListener("load", () => {
-        navigator.serviceWorker
-          .register("sw.js")
-          .catch(error => {
-            console.log(
-              "Service worker belum aktif.",
-              error
-            );
-          });
-      });
-    }
+  });
+}
   </script>
 </body>
 </html>
