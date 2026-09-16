@@ -589,7 +589,7 @@
 input.eq-fader,
 input.band-fader {
   width: 265px !important;
-  height: 24px !important;
+  height: 26px !important;
 
   /* Membuat slider bergerak vertikal */
   writing-mode: vertical-lr !important;
@@ -609,7 +609,7 @@ input.band-fader {
 .fader-container input[type="range"]::-webkit-slider-runnable-track,
 .band-control input[type="range"]::-webkit-slider-runnable-track {
   width: 265px !important;
-  height: 5px !important;
+  height: 6px !important;
   border-radius: 8px !important;
   background: linear-gradient(
     to right,
@@ -739,23 +739,46 @@ input.band-fader {
   box-shadow: 0 0 8px rgba(255, 45, 45, 0.45) !important;
 }
 
-/* Indikator meter */
-.level-meter,
-.meter,
-.meter-bar {
-  background: linear-gradient(
-    to right,
-    #19e85a 0%,
-    #19e85a 60%,
-    #d9ed24 75%,
-    #ffb000 87%,
-    #ff3030 100%
-  ) !important;
-  box-shadow:
-    inset 0 0 3px rgba(0, 0, 0, 0.75),
-    0 0 5px rgba(42, 230, 88, 0.25) !important;
+/* METER LEVEL AUDIO - KOTAK KECIL DAN MEMBULAT */
+
+.meter {
+  height: 14px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 3px !important;
+  padding: 2px !important;
+  background: #020617 !important;
+  border: 1px solid #334155 !important;
+  border-radius: 999px !important;
+  overflow: hidden !important;
 }
 
+.meter span {
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  height: 8px !important;
+  background: #16a34a !important;
+  opacity: .22 !important;
+  border-radius: 999px !important;
+  transition:
+    opacity .08s linear,
+    background .08s linear !important;
+}
+
+.meter span.on {
+  opacity: 1 !important;
+  box-shadow: 0 0 4px rgba(34, 197, 94, .7) !important;
+}
+
+.meter span:nth-child(n+7).on {
+  background: #eab308 !important;
+  box-shadow: 0 0 4px rgba(234, 179, 8, .7) !important;
+}
+
+.meter span:nth-child(n+9).on {
+  background: #ef4444 !important;
+  box-shadow: 0 0 5px rgba(239, 68, 68, .8) !important;
+}
 
 /* =========================================================
    AUDIO ENGINE DAN TOMBOL
