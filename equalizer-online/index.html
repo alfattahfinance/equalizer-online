@@ -1209,12 +1209,16 @@ function updateMeter(channel) {
 
   meter.innerHTML = "";
 
-  for (let i = 0; i < 30; i++) {
-  const segment = document.createElement("span");
-  meter.appendChild(segment);
-}
+  for (let index = 0; index < 30; index++) {
+    const segment = document.createElement("span");
 
-    if (index < level) {
+    if (index >= 25) {
+      segment.classList.add("red");
+    } else if (index >= 19) {
+      segment.classList.add("yellow");
+    }
+
+    if (index >= 30 - level) {
       segment.classList.add("on");
     }
 
