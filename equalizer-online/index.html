@@ -1692,7 +1692,237 @@ main,
     min-width: 8px !important;
     max-width: 8px !important;
   }
-}   
+} 
+    /* =========================================================
+   METER 30 BULATAN KECIL
+   ========================================================= */
+
+.meter {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 3px !important;
+
+  width: 100% !important;
+  height: 18px !important;
+  padding: 3px 5px !important;
+
+  background: #020617 !important;
+  border: 1px solid #334155 !important;
+  border-radius: 999px !important;
+  overflow: visible !important;
+}
+
+.meter span {
+  flex: 0 0 7px !important;
+  width: 7px !important;
+  height: 7px !important;
+  min-width: 7px !important;
+  max-width: 7px !important;
+
+  display: block !important;
+  border-radius: 50% !important;
+
+  background: #15803d !important;
+  opacity: .25 !important;
+
+  transition:
+    opacity .08s linear,
+    background .08s linear,
+    box-shadow .08s linear !important;
+}
+
+/* Bulatan aktif hijau: 1–18 */
+.meter span.on {
+  opacity: 1 !important;
+  background: #22c55e !important;
+  box-shadow:
+    0 0 4px rgba(34, 197, 94, .9),
+    0 0 7px rgba(34, 197, 94, .45) !important;
+}
+
+/* Bulatan kuning: 19–24 */
+.meter span:nth-child(n+19):nth-child(-n+24).on {
+  background: #eab308 !important;
+  box-shadow:
+    0 0 4px rgba(234, 179, 8, .9),
+    0 0 8px rgba(234, 179, 8, .5) !important;
+}
+
+/* Bulatan merah: 25–30 */
+.meter span:nth-child(n+25).on {
+  background: #ef4444 !important;
+  box-shadow:
+    0 0 5px rgba(239, 68, 68, .95),
+    0 0 9px rgba(239, 68, 68, .55) !important;
+}
+
+/* Penyesuaian layar ponsel */
+@media (max-width: 600px) {
+  .meter {
+    gap: 2px !important;
+    padding: 3px 4px !important;
+  }
+
+  .meter span {
+    flex-basis: 6px !important;
+    width: 6px !important;
+    height: 6px !important;
+    min-width: 6px !important;
+    max-width: 6px !important;
+  }
+}
+    /* =========================================================
+   FINAL MOBILE EQ - 31 FADER
+   ========================================================= */
+
+/* Channel 1 dan Channel 2 tetap vertikal */
+.channels {
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+  gap: 14px !important;
+}
+
+.channel {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+}
+
+/* Area EQ dapat digeser horizontal di dalam channel */
+.eq-section {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior-x: contain !important;
+  padding: 5px 0 10px !important;
+}
+
+/* 31 band tetap utuh, tidak dipaksa mengecil */
+.eq {
+  display: grid !important;
+  grid-template-columns: repeat(31, 40px) !important;
+  gap: 4px !important;
+  width: max-content !important;
+  min-width: max-content !important;
+  align-items: stretch !important;
+}
+
+/* Kotak setiap band seragam */
+.band {
+  position: relative !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+
+  width: 40px !important;
+  min-width: 40px !important;
+  max-width: 40px !important;
+  height: 285px !important;
+
+  padding: 6px 2px !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  border-radius: 5px !important;
+}
+
+/* Frekuensi mudah dibaca dan tidak berputar */
+.band-frequency {
+  display: block !important;
+  width: 100% !important;
+  height: 24px !important;
+  min-height: 24px !important;
+
+  color: #e2e8f0 !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  line-height: 1.1 !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+
+  writing-mode: horizontal-tb !important;
+  transform: none !important;
+}
+
+/* Fader vertikal, tidak saling bertabrakan */
+.band input[type="range"] {
+  display: block !important;
+  appearance: auto !important;
+  -webkit-appearance: slider-vertical !important;
+
+  writing-mode: vertical-lr !important;
+  direction: rtl !important;
+
+  width: 18px !important;
+  min-width: 18px !important;
+  max-width: 18px !important;
+  height: 205px !important;
+
+  margin: 0 auto !important;
+  padding: 0 !important;
+  transform: none !important;
+
+  accent-color: #f5a000 !important;
+  cursor: ns-resize !important;
+  touch-action: pan-x !important;
+}
+
+/* Knob kecil dan seragam */
+.band input[type="range"]::-webkit-slider-thumb {
+  width: 14px !important;
+  height: 14px !important;
+}
+
+.band input[type="range"]::-moz-range-thumb {
+  width: 14px !important;
+  height: 14px !important;
+}
+
+/* Nilai dB di bawah */
+.band-value {
+  display: block !important;
+  width: 100% !important;
+  min-height: 16px !important;
+  height: 16px !important;
+
+  color: #fbbf24 !important;
+  font-size: 9px !important;
+  font-weight: 700 !important;
+  line-height: 16px !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+}
+
+/* Penyesuaian layar ponsel */
+@media (max-width: 600px) {
+  .eq {
+    grid-template-columns: repeat(31, 38px) !important;
+    gap: 3px !important;
+  }
+
+  .band {
+    width: 38px !important;
+    min-width: 38px !important;
+    max-width: 38px !important;
+    height: 275px !important;
+  }
+
+  .band-frequency {
+    font-size: 9px !important;
+  }
+
+  .band input[type="range"] {
+    width: 17px !important;
+    min-width: 17px !important;
+    max-width: 17px !important;
+    height: 200px !important;
+  }
+}
   </style>
 </head>
 
@@ -2125,8 +2355,10 @@ function updateMeter(channel) {
 
   meter.innerHTML = "";
 
-  for (let index = 0; index < 10; index++) {
-    const segment = document.createElement("span");
+  for (let i = 0; i < 30; i++) {
+  const segment = document.createElement("span");
+  meter.appendChild(segment);
+}
 
     if (index < level) {
       segment.classList.add("on");
@@ -3522,6 +3754,8 @@ if ("serviceWorker" in navigator) {
       });
   });
 }
+
+    
   </script>
 </body>
 </html>
