@@ -1460,18 +1460,15 @@ function disconnectCurrentSource() {
 /* =========================================================
    HUBUNGKAN SOURCE KE EQ
 ========================================================= */
-
 function connectAudioSource(source, sourceType) {
   initializeAudioGraph();
-  disconnectCurrentSource();
 
   activeSource = source;
   activeSourceType = sourceType;
 
   source.connect(splitterNode);
 
-  const channelCount =
-    source.channelCount || 2;
+  const channelCount = source.channelCount || 2;
 
   if (channelCount <= 1) {
     splitterNode.connect(
@@ -1502,6 +1499,7 @@ function connectAudioSource(source, sourceType) {
     " aktif. Audio melewati EQ Channel 1 dan Channel 2."
   );
 }
+
 
 /* =========================================================
    FILE AUDIO
