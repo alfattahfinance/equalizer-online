@@ -742,7 +742,7 @@ input.band-fader {
 /* METER LEVEL AUDIO - KOTAK KECIL DAN MEMBULAT */
 
 .meter {
-  height: 14px !important;
+  height: 12px !important;
   display: flex !important;
   align-items: center !important;
   gap: 3px !important;
@@ -756,7 +756,7 @@ input.band-fader {
 .meter span {
   flex: 1 1 0 !important;
   min-width: 0 !important;
-  height: 8px !important;
+  height: 6px !important;
   background: #16a34a !important;
   opacity: .22 !important;
   border-radius: 999px !important;
@@ -1016,7 +1016,7 @@ main,
 }
 
 .meter {
-  height: 18px !important;
+  height: 16px !important;
   display: flex !important;
   gap: 3px !important;
   padding: 3px !important;
@@ -1121,10 +1121,10 @@ main,
   writing-mode: vertical-lr !important;
   direction: rtl !important;
 
-  width: 18px !important;
+  width: 19px !important;
   height: 205px !important;
-  min-width: 18px !important;
-  max-width: 18px !important;
+  min-width: 19px !important;
+  max-width: 19px !important;
 
   margin: 0 auto !important;
   padding: 0 !important;
@@ -1364,11 +1364,11 @@ main,
   writing-mode: vertical-lr !important;
   direction: rtl !important;
 
-  width: 18px !important;
+  width: 19px !important;
   height: 205px !important;
 
-  min-width: 18px !important;
-  max-width: 18px !important;
+  min-width: 19px !important;
+  max-width: 19px !important;
 
   margin: 0 auto !important;
   padding: 0 !important;
@@ -1518,6 +1518,105 @@ main,
     height: auto !important;
   }
 }
+
+  /* =====================================================
+   PERAPIAN FADER EQ 31 BAND
+   ===================================================== */
+
+.eq {
+  display: grid !important;
+  grid-template-columns: repeat(31, minmax(38px, 1fr)) !important;
+  gap: 4px !important;
+  min-width: 1320px !important;
+  align-items: stretch !important;
+}
+
+.band {
+  position: relative !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  box-sizing: border-box !important;
+  height: 285px !important;
+  padding: 6px 2px !important;
+  overflow: hidden !important;
+  border-radius: 5px !important;
+}
+
+/* Label frekuensi dibuat horizontal dan mudah dibaca */
+.band-frequency {
+  display: block !important;
+  width: 100% !important;
+  min-height: 22px !important;
+  color: #e2e8f0 !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  line-height: 1.1 !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+  writing-mode: horizontal-tb !important;
+  transform: none !important;
+}
+
+/* Fader tetap panjang, tetapi lebih proporsional */
+.band input[type="range"] {
+  display: block !important;
+  width: 18px !important;
+  min-width: 18px !important;
+  max-width: 18px !important;
+  height: 205px !important;
+  margin: 2px auto !important;
+  padding: 0 !important;
+  transform: none !important;
+  writing-mode: vertical-lr !important;
+  direction: rtl !important;
+  accent-color: #f5a000 !important;
+}
+
+/* Knob lebih kecil dan seragam */
+.band input[type="range"]::-webkit-slider-thumb {
+  width: 14px !important;
+  height: 14px !important;
+}
+
+.band input[type="range"]::-moz-range-thumb {
+  width: 14px !important;
+  height: 14px !important;
+}
+
+/* Nilai bawah tetap sejajar */
+.band-value {
+  width: 100% !important;
+  min-height: 18px !important;
+  color: #fbbf24 !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  line-height: 1.1 !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+}
+
+/* Skala dB dibuat sejajar dengan area fader */
+.eq-section {
+  position: relative !important;
+  width: 100% !important;
+  overflow-x: auto !important;
+  padding: 4px 0 8px !important;
+}
+
+.eq-scale {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  width: 100% !important;
+  margin-top: 4px !important;
+  padding: 0 8px !important;
+  box-sizing: border-box !important;
+  color: #cbd5e1 !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+}  
     
   </style>
 </head>
