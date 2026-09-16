@@ -921,8 +921,10 @@ main,
     0 0 6px #39f56b,
     0 0 14px rgba(57, 245, 107, .85) !important;
 }
+/* =========================================================
+   GAIN, HPF, RANGE, LEVEL METER SEJAJAR
+   ========================================================= */
 
-/* GAIN, HPF, RANGE, LEVEL METER SEJAJAR */
 .control-row-four {
   display: grid !important;
   grid-template-columns:
@@ -971,7 +973,11 @@ main,
   color: #f8fafc !important;
 }
 
-/* METER */
+
+/* =========================================================
+   METER
+   ========================================================= */
+
 .meter-control {
   display: flex !important;
   flex-direction: column !important;
@@ -1038,7 +1044,11 @@ main,
   box-shadow: 0 0 10px rgba(239, 68, 68, .8) !important;
 }
 
-/* PANEL EQ */
+
+/* =========================================================
+   PANEL EQ
+   ========================================================= */
+
 .eq-section {
   width: 100% !important;
   overflow-x: auto !important;
@@ -1053,40 +1063,100 @@ main,
   align-items: end !important;
 }
 
+
+/* =========================================================
+   SETIAP BAND EQ
+   ========================================================= */
+
 .band {
+  position: relative !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  box-sizing: border-box !important;
   height: 285px !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
   background:
     linear-gradient(180deg, #1e293b, #0f172a) !important;
   border: 1px solid #475569 !important;
   border-radius: 5px !important;
   padding: 5px 2px !important;
-  box-shadow: inset 0 0 0 1px rgba(2, 6, 23, .65) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(2, 6, 23, .65) !important;
 }
 
+
+/* =========================================================
+   FADER 31 BAND - VERTIKAL
+   ========================================================= */
+
 .band input[type="range"] {
-  width: 255px !important;
-  height: 22px !important;
+  appearance: auto !important;
+  -webkit-appearance: slider-vertical !important;
   writing-mode: vertical-lr !important;
   direction: rtl !important;
-  transform: rotate(180deg) !important;
-  accent-color: #f59e0b !important;
+
+  width: 18px !important;
+  height: 205px !important;
+  min-width: 18px !important;
+  max-width: 18px !important;
+
+  margin: 0 auto !important;
+  padding: 0 !important;
+  transform: none !important;
+
+  accent-color: #f5a000 !important;
   cursor: ns-resize !important;
-  touch-action: none !important;
+  touch-action: pan-x !important;
 }
+
+.band input[type="range"]::-webkit-slider-runnable-track {
+  width: 6px !important;
+  border-radius: 4px !important;
+}
+
+.band input[type="range"]::-webkit-slider-thumb {
+  width: 16px !important;
+  height: 16px !important;
+}
+
+.band input[type="range"]::-moz-range-track {
+  width: 6px !important;
+  border-radius: 4px !important;
+}
+
+.band input[type="range"]::-moz-range-thumb {
+  width: 16px !important;
+  height: 16px !important;
+}
+
+
+/* =========================================================
+   NILAI DAN FREKUENSI BAND
+   ========================================================= */
 
 .band-value {
   color: #fbbf24 !important;
   font-size: 10px !important;
   font-weight: 700 !important;
   text-align: center !important;
+  line-height: 1.2 !important;
 }
 
 .band-frequency {
   color: #cbd5e1 !important;
   font-size: 9px !important;
+  text-align: center !important;
+  line-height: 1.2 !important;
 }
 
-/* AUDIO ENGINE */
+
+/* =========================================================
+   AUDIO ENGINE
+   ========================================================= */
+
 .audio-panel {
   margin-top: 14px !important;
   padding: 12px !important;
@@ -1155,7 +1225,11 @@ main,
   height: 52px !important;
 }
 
-/* OUTPUT PANEL */
+
+/* =========================================================
+   OUTPUT PANEL
+   ========================================================= */
+
 .output-panel {
   display: grid !important;
   grid-template-columns: 1fr 1fr !important;
@@ -1169,7 +1243,11 @@ main,
   border-radius: 6px !important;
 }
 
-/* TABLET */
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
 @media (max-width: 1100px) {
   .control-row-four {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
@@ -1184,7 +1262,11 @@ main,
   }
 }
 
-/* HP */
+
+/* =========================================================
+   HP
+   ========================================================= */
+
 @media (max-width: 600px) {
   .control-row-four {
     grid-template-columns: 1fr !important;
@@ -1210,6 +1292,207 @@ main,
 
   .output-panel {
     grid-template-columns: 1fr !important;
+  }
+}
+
+/* =========================================================
+   PERBAIKAN FINAL FADER 31 BAND
+   Skin tetap sama, ukuran channel tidak diubah
+   ========================================================= */
+
+.eq {
+  display: grid !important;
+  grid-template-columns: repeat(31, minmax(40px, 1fr)) !important;
+  gap: 5px !important;
+  min-width: 1280px !important;
+  align-items: stretch !important;
+}
+
+.band {
+  position: relative !important;
+  width: 100% !important;
+  height: 285px !important;
+  min-width: 0 !important;
+  padding: 5px 2px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  overflow: hidden !important;
+}
+
+/* Label frekuensi tetap vertikal */
+.band-frequency {
+  height: 44px !important;
+  min-height: 44px !important;
+  font-size: 9px !important;
+  writing-mode: vertical-rl !important;
+  transform: rotate(180deg) !important;
+}
+
+/* Fader vertikal dan berada tepat di tengah */
+.band input[type="range"],
+.eq-band input[type="range"],
+.fader-container input[type="range"],
+.band-control input[type="range"] {
+  appearance: auto !important;
+  -webkit-appearance: slider-vertical !important;
+
+  writing-mode: vertical-lr !important;
+  direction: rtl !important;
+
+  width: 18px !important;
+  height: 205px !important;
+
+  min-width: 18px !important;
+  max-width: 18px !important;
+
+  margin: 0 auto !important;
+  padding: 0 !important;
+
+  transform: none !important;
+  accent-color: #f5a000 !important;
+  cursor: ns-resize !important;
+  touch-action: pan-x !important;
+}
+
+/* Tampilan fader untuk browser WebKit/Chrome */
+.band input[type="range"]::-webkit-slider-runnable-track {
+  width: 6px !important;
+  border-radius: 4px !important;
+}
+
+.band input[type="range"]::-webkit-slider-thumb {
+  width: 16px !important;
+  height: 16px !important;
+}
+
+/* Nilai dB tetap berada di bagian bawah */
+.band-value {
+  min-height: 12px !important;
+  height: 12px !important;
+  line-height: 12px !important;
+  font-size: 9px !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+}
+
+/* =========================================================
+   AUDIO ENGINE LEBIH RINGKAS
+   ========================================================= */
+
+.audio-panel,
+.audio-engine,
+#audio-engine {
+  width: 100% !important;
+  max-width: 100% !important;
+  padding: 10px !important;
+  margin-top: 12px !important;
+  box-sizing: border-box !important;
+}
+
+.audio-panel h3 {
+  margin: 0 0 8px !important;
+  font-size: 15px !important;
+}
+
+/* Kartu Audio Engine dibuat lebih kecil dan sejajar */
+.audio-actions {
+  display: grid !important;
+  grid-template-columns:
+    minmax(210px, 1.15fr)
+    repeat(4, minmax(125px, 1fr)) !important;
+
+  gap: 8px !important;
+  width: 100% !important;
+  align-items: stretch !important;
+  margin-bottom: 8px !important;
+}
+
+/* Panel input device dipadatkan */
+.input-device-panel {
+  margin: 0 !important;
+  padding: 8px !important;
+  min-width: 0 !important;
+  height: 76px !important;
+  box-sizing: border-box !important;
+}
+
+.input-device-row {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  gap: 6px !important;
+  align-items: end !important;
+}
+
+.input-device-row label {
+  margin-bottom: 4px !important;
+  font-size: 10px !important;
+}
+
+.input-device-row select,
+.input-device-row button {
+  min-height: 32px !important;
+  padding: 5px 7px !important;
+  font-size: 11px !important;
+}
+
+.device-status {
+  margin-top: 4px !important;
+  font-size: 10px !important;
+  line-height: 1.2 !important;
+}
+
+/* Semua tombol Audio Engine diperkecil */
+.audio-actions > button,
+.audio-actions > .file-button {
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 76px !important;
+  height: 76px !important;
+
+  padding: 8px !important;
+  font-size: 12px !important;
+  line-height: 1.2 !important;
+  white-space: normal !important;
+  text-align: center !important;
+}
+
+/* Player dibuat lebih rapat */
+#audioPlayer {
+  width: 100% !important;
+  height: 38px !important;
+  margin-top: 6px !important;
+}
+
+/* =========================================================
+   RESPONSIVE HP
+   ========================================================= */
+
+@media (max-width: 900px) {
+  .audio-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .input-device-panel {
+    height: auto !important;
+    min-height: 76px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .audio-actions {
+    grid-template-columns: 1fr !important;
+  }
+
+  .audio-actions > button,
+  .audio-actions > .file-button {
+    min-height: 58px !important;
+    height: 58px !important;
+  }
+
+  .input-device-panel {
+    height: auto !important;
   }
 }
     
