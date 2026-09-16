@@ -133,19 +133,19 @@
       font-weight: bold;
     }
 
-    .channels {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 16px;
-   }
+     .channels {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 14px !important;
+  width: 100% !important;
+}
 
-    .channel {
-  width: 100%;
-  min-width: 0;
-  background: linear-gradient(#374151, #1f2937);
-  border: 1px solid #6b7280;
-  border-radius: 6px;
-  padding: 12px;
+.channel {
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
 }
     .channel-header {
       display: flex;
@@ -420,10 +420,6 @@
       padding: 12px 0 4px;
     }
 
-    @media (max-width: 850px) {
-      .channels {
-        grid-template-columns: 1fr;
-      }
 
       .brand {
         font-size: 18px;
@@ -505,6 +501,12 @@
   .input-device-row button {
     width: 100%;
   }
+  .audio-engine {
+  display: block !important;
+  width: 100% !important;
+  margin-top: 14px !important;
+  box-sizing: border-box !important;
+}
 }
   </style>
 </head>
