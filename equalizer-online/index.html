@@ -421,10 +421,11 @@
     }
 
 
-      .brand {
-        font-size: 18px;
-      }
-    }
+    @media (max-width: 768px) {
+  .brand {
+    font-size: 18px;
+  }
+}
 
     @media (max-width: 480px) {
       .app {
@@ -883,6 +884,335 @@ main,
   overflow-x: hidden !important;
   box-sizing: border-box !important;
 }
+/* =========================================================
+   TAMPILAN SESUAI GAMBAR ACUAN
+========================================================= */
+
+.channel {
+  background:
+    linear-gradient(145deg, #334155, #172033 45%, #0f172a) !important;
+  border: 1px solid #64748b !important;
+  border-radius: 8px !important;
+  padding: 12px !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(15, 23, 42, .9),
+    0 8px 18px rgba(0, 0, 0, .28) !important;
+}
+
+.channel-header {
+  min-height: 38px !important;
+  padding: 0 4px 8px !important;
+  border-bottom: 1px solid #475569 !important;
+}
+
+.channel-title {
+  color: #f8fafc !important;
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  letter-spacing: .3px !important;
+}
+
+.channel-title::before {
+  width: 17px !important;
+  height: 17px !important;
+  margin-right: 12px !important;
+  background: #39f56b !important;
+  box-shadow:
+    0 0 6px #39f56b,
+    0 0 14px rgba(57, 245, 107, .85) !important;
+}
+
+/* GAIN, HPF, RANGE, LEVEL METER SEJAJAR */
+.control-row-four {
+  display: grid !important;
+  grid-template-columns:
+    minmax(180px, 1.1fr)
+    minmax(150px, .9fr)
+    minmax(150px, .9fr)
+    minmax(230px, 1.35fr) !important;
+  gap: 8px !important;
+  align-items: stretch !important;
+  margin-bottom: 10px !important;
+}
+
+.control-row-four .control {
+  min-width: 0 !important;
+  min-height: 78px !important;
+  background: #172235 !important;
+  border: 1px solid #52647b !important;
+  border-radius: 6px !important;
+  padding: 9px !important;
+}
+
+.control-row-four .control label {
+  color: #e2e8f0 !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  margin-bottom: 8px !important;
+}
+
+.control-row-four .gain {
+  width: 100% !important;
+  accent-color: #22c55e !important;
+}
+
+.gain-value {
+  color: #f8fafc !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  text-align: center !important;
+  margin-top: 3px !important;
+}
+
+.control-row-four select {
+  height: 38px !important;
+  background: #26364b !important;
+  border: 1px solid #64748b !important;
+  color: #f8fafc !important;
+}
+
+/* METER */
+.meter-control {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+}
+
+.meter-area {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 45px !important;
+  gap: 8px !important;
+  align-items: center !important;
+  margin: 0 !important;
+}
+
+.meter {
+  height: 18px !important;
+  display: flex !important;
+  gap: 3px !important;
+  padding: 3px !important;
+  background: #020617 !important;
+  border: 1px solid #334155 !important;
+  border-radius: 4px !important;
+}
+
+.meter span {
+  flex: 1 !important;
+  min-width: 0 !important;
+  background: #16a34a !important;
+  opacity: .22 !important;
+  border-radius: 2px !important;
+}
+
+.meter span.on {
+  opacity: 1 !important;
+  box-shadow: 0 0 4px rgba(34, 197, 94, .7) !important;
+}
+
+.meter span:nth-child(n+7).on {
+  background: #eab308 !important;
+  box-shadow: 0 0 4px rgba(234, 179, 8, .7) !important;
+}
+
+.meter span:nth-child(n+9).on {
+  background: #ef4444 !important;
+  box-shadow: 0 0 5px rgba(239, 68, 68, .8) !important;
+}
+
+.clip {
+  min-height: 36px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: #fca5a5 !important;
+  background: #450a0a !important;
+  border: 1px solid #7f1d1d !important;
+  border-radius: 5px !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+}
+
+.clip.on {
+  background: #dc2626 !important;
+  color: white !important;
+  box-shadow: 0 0 10px rgba(239, 68, 68, .8) !important;
+}
+
+/* PANEL EQ */
+.eq-section {
+  width: 100% !important;
+  overflow-x: auto !important;
+  padding: 4px 0 8px !important;
+}
+
+.eq {
+  display: grid !important;
+  grid-template-columns: repeat(31, minmax(38px, 1fr)) !important;
+  gap: 5px !important;
+  min-width: 1320px !important;
+  align-items: end !important;
+}
+
+.band {
+  height: 285px !important;
+  background:
+    linear-gradient(180deg, #1e293b, #0f172a) !important;
+  border: 1px solid #475569 !important;
+  border-radius: 5px !important;
+  padding: 5px 2px !important;
+  box-shadow: inset 0 0 0 1px rgba(2, 6, 23, .65) !important;
+}
+
+.band input[type="range"] {
+  width: 255px !important;
+  height: 22px !important;
+  writing-mode: vertical-lr !important;
+  direction: rtl !important;
+  transform: rotate(180deg) !important;
+  accent-color: #f59e0b !important;
+  cursor: ns-resize !important;
+  touch-action: none !important;
+}
+
+.band-value {
+  color: #fbbf24 !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  text-align: center !important;
+}
+
+.band-frequency {
+  color: #cbd5e1 !important;
+  font-size: 9px !important;
+}
+
+/* AUDIO ENGINE */
+.audio-panel {
+  margin-top: 14px !important;
+  padding: 12px !important;
+  background:
+    linear-gradient(145deg, #334155, #172033 50%, #0f172a) !important;
+  border: 1px solid #64748b !important;
+  border-radius: 8px !important;
+}
+
+.audio-panel h3 {
+  color: #f8fafc !important;
+  font-size: 16px !important;
+  letter-spacing: .4px !important;
+}
+
+.audio-actions {
+  display: grid !important;
+  grid-template-columns:
+    minmax(260px, 1.3fr)
+    repeat(4, minmax(130px, 1fr)) !important;
+  gap: 10px !important;
+  align-items: stretch !important;
+}
+
+.input-device-panel {
+  margin: 0 !important;
+  padding: 10px !important;
+  background: #0f1b2e !important;
+  border: 1px solid #52647b !important;
+  border-radius: 6px !important;
+}
+
+.input-device-row {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  gap: 8px !important;
+  align-items: end !important;
+}
+
+.audio-actions button,
+.file-button {
+  min-height: 78px !important;
+  border-radius: 6px !important;
+  font-weight: 700 !important;
+  background: #1e293b !important;
+  border: 1px solid #64748b !important;
+}
+
+#startMicButton {
+  background: linear-gradient(145deg, #064e3b, #14532d) !important;
+  border-color: #22c55e !important;
+}
+
+#startAudioButton {
+  background: linear-gradient(145deg, #064e3b, #14532d) !important;
+  border-color: #22c55e !important;
+}
+
+#stopAudioButton {
+  background: linear-gradient(145deg, #7f1d1d, #450a0a) !important;
+  border-color: #ef4444 !important;
+}
+
+#audioPlayer {
+  margin-top: 10px !important;
+  height: 52px !important;
+}
+
+/* OUTPUT PANEL */
+.output-panel {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 10px !important;
+  margin-top: 10px !important;
+}
+
+.output-control {
+  background: #0f1b2e !important;
+  border: 1px solid #52647b !important;
+  border-radius: 6px !important;
+}
+
+/* TABLET */
+@media (max-width: 1100px) {
+  .control-row-four {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .audio-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .input-device-panel {
+    grid-column: 1 / -1 !important;
+  }
+}
+
+/* HP */
+@media (max-width: 600px) {
+  .control-row-four {
+    grid-template-columns: 1fr !important;
+  }
+
+  .audio-actions {
+    grid-template-columns: 1fr !important;
+  }
+
+  .audio-actions button,
+  .file-button {
+    width: 100% !important;
+    min-height: 58px !important;
+  }
+
+  .input-device-row {
+    grid-template-columns: 1fr !important;
+  }
+
+  .input-device-row button {
+    width: 100% !important;
+  }
+
+  .output-panel {
+    grid-template-columns: 1fr !important;
+  }
+}
+    
   </style>
 </head>
 
@@ -1839,12 +2169,30 @@ function disconnectCurrentSource() {
 function connectAudioSource(source, sourceType) {
   initializeAudioGraph();
 
+  if (!source) {
+    throw new Error("Sumber audio tidak tersedia.");
+  }
+
+  if (activeSource && activeSource !== source) {
+    try {
+      activeSource.disconnect();
+    } catch (error) {
+      console.warn("Source lama sudah terputus.", error);
+    }
+  }
+
   activeSource = source;
   activeSourceType = sourceType;
 
+  try {
+    source.disconnect();
+  } catch (error) {
+    // Source mungkin belum pernah tersambung.
+  }
+
   source.connect(splitterNode);
 
-  const channelCount = source.channelCount || 2;
+  const channelCount = source.channelCount || 1;
 
   if (channelCount <= 1) {
     splitterNode.connect(
@@ -1875,7 +2223,6 @@ function connectAudioSource(source, sourceType) {
     " aktif. Audio melewati EQ Channel 1 dan Channel 2."
   );
 }
-
 /* =========================================================
    FILE AUDIO
 ========================================================= */
@@ -1964,28 +2311,31 @@ startAudioButton.addEventListener(
             audioPlayer
           );
       }
-       disconnectCurrentSource();
 
-       connectAudioSource(
-       audioElementSource,
-         "File audio"
-   );
-      
-      if (activeSource !== audioElementSource) {
-  disconnectCurrentSource();
+      /*
+        Putuskan sumber audio sebelumnya.
+        Tidak perlu connect dua kali.
+      */
+      disconnectCurrentSource();
 
-  connectAudioSource(
-    audioElementSource,
-    "File audio"
-  );
-}
+      connectAudioSource(
+        audioElementSource,
+        "File audio"
+      );
 
       await audioPlayer.play();
 
       audioRunning = true;
 
+      startAudioButton.classList.add("active");
+      stopAudioButton.classList.remove("active");
+
       setAudioStatus(
         "File audio sedang diputar melalui EQ."
+      );
+
+      setStatus(
+        "File audio aktif."
       );
 
     } catch (error) {
@@ -1994,10 +2344,13 @@ startAudioButton.addEventListener(
       setAudioStatus(
         "Pemutaran audio gagal. Tekan START AUDIO kembali."
       );
+
+      setStatus(
+        "Gagal memutar file audio."
+      );
     }
   }
 );
-
 /* =========================================================
    INPUT MICROPHONE
 ========================================================= */
