@@ -73,7 +73,7 @@ select:focus-visible {
   max-width: 100%;
   min-width: 0;
   margin: 0 auto;
-  padding: 0;
+  padding: 10px;
 }
 
 main,
@@ -98,686 +98,451 @@ footer {
 ========================================================= */
 
 header,
-.top-bar,
-.header,
-.toolbar {
+.topbar {
   width: 100%;
   min-width: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 12px;
+  background: #161a22;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px solid #3a414b;
+  margin-bottom: 12px;
 }
 
-header h1,
-header h2,
-header h3,
-.title {
-  min-width: 0;
-  margin: 0;
-  overflow-wrap: anywhere;
+.brand {
+  font-weight: bold;
+  font-size: 16px;
+  color: #00d9ff;
+}
+
+.subtitle {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.actions button {
+  background: #252b35;
+  color: #fff;
+  border: 1px solid #485260;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: bold;
+}
+
+.actions button:hover,
+.actions button.active {
+  background: #00d9ff;
+  color: #000;
+  border-color: #00d9ff;
 }
 
 /* =========================================================
-   CHANNEL CONTAINER
+   RACK & CHANNEL CONTAINER
 ========================================================= */
 
-.channels,
-.channel-list,
-.channels-container {
+.rack {
+  background: #14181f;
+  border: 1px solid #3a414b;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.rack-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  border-bottom: 1px solid #2a323d;
+  padding-bottom: 8px;
+}
+
+.model {
+  font-size: 14px;
+  font-weight: bold;
+  color: #f59e0b;
+}
+
+.grade {
+  font-size: 10px;
+  color: #94a3b8;
+}
+
+.channels {
   display: flex;
   flex-direction: column;
-  width: 100%;
-  min-width: 0;
   gap: 14px;
-  margin: 0;
-  padding: 0;
 }
 
-.channel,
-.channel-strip,
-.channel-card {
-  position: relative;
-  width: 100%;
-  min-width: 0;
-  max-width: 100%;
-  overflow: hidden;
-  border-radius: 10px;
+.channel {
+  background: #1b2027;
+  border: 1px solid #3a414b;
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.channel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.channel-title {
+  font-size: 12px;
+  font-weight: bold;
+  color: #38bdf8;
+}
+
+.channel-controls {
+  display: flex;
+  gap: 6px;
+}
+
+.small-button {
+  background: #252b35;
+  color: #cbd5e1;
+  border: 1px solid #485260;
+  padding: 3px 8px;
+  font-size: 10px;
+  border-radius: 3px;
+}
+
+.small-button.active {
+  background: #ef4444;
+  color: #fff;
+  border-color: #f87171;
+}
+
+.small-button.test-button.active {
+  background: #f59e0b;
+  color: #000;
 }
 
 /* =========================================================
-   EQUALIZER SECTION
+   CONTROL ROW (GAIN, HPF, RANGE)
 ========================================================= */
 
-.eq-section,
-.equalizer-section,
-.eq-wrapper {
+.control-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 10px;
+  background: #101216;
+  padding: 8px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  align-items: center;
+}
+
+.control label {
+  display: block;
+  font-size: 9px;
+  color: #94a3b8;
+  margin-bottom: 3px;
+}
+
+.control input[type="range"] {
   width: 100%;
-  min-width: 0;
-  max-width: 100%;
-  overflow-x: auto;
-  overflow-y: hidden;
-  padding: 8px 4px 12px;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior-x: contain;
-  scrollbar-width: thin;
+  accent-color: #f59e0b;
 }
 
-.eq-section::-webkit-scrollbar,
-.equalizer-section::-webkit-scrollbar,
-.eq-wrapper::-webkit-scrollbar {
-  height: 7px;
+.gain-value {
+  font-size: 10px;
+  color: #f59e0b;
+  text-align: center;
+  font-family: monospace;
 }
 
-.eq-section::-webkit-scrollbar-thumb,
-.equalizer-section::-webkit-scrollbar-thumb,
-.eq-wrapper::-webkit-scrollbar-thumb {
-  background: #555d68;
-  border-radius: 20px;
+.control select {
+  width: 100%;
+  background: #1e293b;
+  color: #fff;
+  border: 1px solid #485260;
+  padding: 4px;
+  font-size: 11px;
+  border-radius: 4px;
 }
 
-.eq-section::-webkit-scrollbar-track,
-.equalizer-section::-webkit-scrollbar-track,
-.eq-wrapper::-webkit-scrollbar-track {
-  background: #20242b;
+/* =========================================================
+   METER AREA
+========================================================= */
+
+.meter-area {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #0d1015;
+  padding: 4px 8px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+.meter {
+  display: flex;
+  gap: 2px;
+  height: 12px;
+  align-items: center;
+}
+
+.meter span {
+  width: 6px;
+  height: 8px;
+  background: #252b35;
+  border-radius: 1px;
+}
+
+.meter span.on {
+  background: #10b981;
+}
+
+.meter span.yellow.on {
+  background: #f59e0b;
+}
+
+.meter span.red.on {
+  background: #ef4444;
+}
+
+.clip {
+  font-size: 9px;
+  font-weight: bold;
+  color: #485260;
+  background: #161a22;
+  padding: 2px 6px;
+  border-radius: 2px;
+}
+
+.clip.on {
+  background: #ef4444;
+  color: #fff;
+  box-shadow: 0 0 6px #ef4444;
 }
 
 /* =========================================================
    31 BAND EQUALIZER
 ========================================================= */
 
-.eq,
-.equalizer,
-.eq-bands {
+.eq-section {
+  width: 100%;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  scrollbar-width: thin;
+}
+
+.eq {
   display: grid;
-  grid-template-columns: repeat(31, 40px);
-  grid-auto-rows: auto;
+  grid-template-columns: repeat(31, 38px);
   gap: 4px;
-  width: max-content;
   min-width: max-content;
-  max-width: none;
-  margin: 0 auto;
-  padding: 4px;
-  align-items: start;
 }
 
-/* =========================================================
-   BAND / CHANNEL STRIP
-========================================================= */
-
-.band,
-.eq-band,
-.frequency-band {
-  position: relative;
+.band {
+  background: #101216;
+  border: 1px solid #2a323d;
+  border-radius: 4px;
+  padding: 4px 2px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
-  width: 40px;
-  min-width: 40px;
-  max-width: 40px;
-  height: 285px;
-  min-height: 285px;
-  padding: 5px 2px;
-  margin: 0;
-  overflow: hidden;
-  border: 1px solid #3a414b;
-  border-radius: 6px;
-  background:
-    linear-gradient(
-      180deg,
-      #303640 0%,
-      #20252d 45%,
-      #171b21 100%
-    );
+  height: 230px;
 }
 
-/* =========================================================
-   FREQUENCY LABEL
-========================================================= */
-
-.band-frequency,
-.frequency,
-.freq-label {
-  display: block;
-  width: 100%;
-  min-height: 18px;
-  margin: 0 0 4px;
-  padding: 0;
-  color: #d9e0e8;
-  font-size: 10px;
-  font-weight: 700;
-  line-height: 1.1;
+.band-frequency {
+  font-size: 8px;
+  color: #94a3b8;
+  margin-bottom: 4px;
   text-align: center;
-  white-space: nowrap;
-  writing-mode: horizontal-tb;
-  transform: none;
 }
 
-/* =========================================================
-   BAND TITLE / NUMBER
-========================================================= */
-
-.band-title,
-.band-number,
-.channel-number {
-  width: 100%;
-  margin: 0 0 3px;
-  color: #ffffff;
-  font-size: 10px;
-  font-weight: 700;
-  line-height: 1.1;
-  text-align: center;
-  white-space: nowrap;
-}
-
-/* =========================================================
-   FADER CONTAINER
-========================================================= */
-
-.fader-container,
-.band-control,
-.fader-wrapper {
-  display: flex;
-  flex: 1 1 auto;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  min-width: 0;
-  min-height: 0;
-  margin: 0;
-  padding: 0;
-}
-
-/* =========================================================
-   VERTICAL FADER
-========================================================= */
-
-.band input[type="range"],
-.eq-band input[type="range"],
-.fader-container input[type="range"],
-.band-control input[type="range"] {
-  display: block;
-  width: 18px;
-  min-width: 18px;
-  max-width: 18px;
-  height: 205px;
-  min-height: 205px;
-  margin: 0;
-  padding: 0;
-  accent-color: #00d9ff;
-  cursor: pointer;
+.band input[type="range"] {
   writing-mode: vertical-lr;
   direction: rtl;
-  transform: none;
-  touch-action: none;
-  -webkit-appearance: slider-vertical;
-  appearance: auto;
+  width: 16px;
+  height: 165px;
+  accent-color: #38bdf8;
+  cursor: pointer;
 }
 
-/* Chrome / Safari track */
-
-.band input[type="range"]::-webkit-slider-runnable-track,
-.eq-band input[type="range"]::-webkit-slider-runnable-track,
-.fader-container input[type="range"]::-webkit-slider-runnable-track,
-.band-control input[type="range"]::-webkit-slider-runnable-track {
-  width: 6px;
-  border-radius: 10px;
-  background: #080a0d;
-}
-
-/* Chrome / Safari thumb */
-
-.band input[type="range"]::-webkit-slider-thumb,
-.eq-band input[type="range"]::-webkit-slider-thumb,
-.fader-container input[type="range"]::-webkit-slider-thumb,
-.band-control input[type="range"]::-webkit-slider-thumb {
-  width: 18px;
-  height: 18px;
-  border: 2px solid #dce5ee;
-  border-radius: 50%;
-  background: #00bcd4;
-  box-shadow:
-    0 0 0 2px #17202a,
-    0 1px 4px rgba(0, 0, 0, 0.7);
-  -webkit-appearance: none;
-  appearance: none;
-}
-
-/* Firefox track */
-
-.band input[type="range"]::-moz-range-track,
-.eq-band input[type="range"]::-moz-range-track,
-.fader-container input[type="range"]::-moz-range-track,
-.band-control input[type="range"]::-moz-range-track {
-  width: 6px;
-  border-radius: 10px;
-  background: #080a0d;
-}
-
-/* Firefox progress */
-
-.band input[type="range"]::-moz-range-progress,
-.eq-band input[type="range"]::-moz-range-progress,
-.fader-container input[type="range"]::-moz-range-progress,
-.band-control input[type="range"]::-moz-range-progress {
-  border-radius: 10px;
-  background: #00bcd4;
-}
-
-/* Firefox thumb */
-
-.band input[type="range"]::-moz-range-thumb,
-.eq-band input[type="range"]::-moz-range-thumb,
-.fader-container input[type="range"]::-moz-range-thumb,
-.band-control input[type="range"]::-moz-range-thumb {
-  width: 15px;
-  height: 15px;
-  border: 2px solid #dce5ee;
-  border-radius: 50%;
-  background: #00bcd4;
-}
-
-/* =========================================================
-   KNOB / VALUE
-========================================================= */
-
-.knob,
-.band-knob,
-.fader-knob {
-  width: 14px;
-  height: 14px;
-  min-width: 14px;
-  min-height: 14px;
-  margin: 4px 0;
-  border: 2px solid #aeb8c5;
-  border-radius: 50%;
-  background:
-    radial-gradient(
-      circle at 35% 30%,
-      #ffffff 0 10%,
-      #7c8794 35%,
-      #303740 70%
-    );
-  box-shadow:
-    inset 0 0 2px rgba(255, 255, 255, 0.7),
-    0 1px 3px rgba(0, 0, 0, 0.7);
-}
-
-.band-value,
-.fader-value,
-.value-label {
-  width: 100%;
-  min-height: 16px;
-  margin: 3px 0 0;
-  padding: 0;
-  color: #ffffff;
-  font-size: 10px;
-  font-weight: 700;
-  line-height: 1.1;
+.band-value {
+  font-size: 8px;
+  color: #38bdf8;
+  margin-top: 4px;
+  font-family: monospace;
   text-align: center;
-  white-space: nowrap;
 }
 
-/* =========================================================
-   METER BULAT KECIL
-========================================================= */
-
-.meter,
-.level-meter,
-.led-meter {
+.scale {
   display: flex;
-  flex-direction: column-reverse;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 2px;
-  width: 10px;
-  min-width: 10px;
-  height: 150px;
-  min-height: 150px;
-  margin: 4px auto;
-  padding: 2px 0;
-}
-
-/* LED dasar */
-
-.meter span,
-.level-meter span,
-.led-meter span {
-  display: block;
-  width: 6px;
-  height: 6px;
-  min-width: 6px;
-  min-height: 6px;
-  border: 1px solid #303640;
-  border-radius: 50%;
-  background: #252b33;
-  box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.8);
-  transition:
-    background 80ms linear,
-    box-shadow 80ms linear;
-}
-
-/* LED hijau aktif */
-
-.meter span.on,
-.level-meter span.on,
-.led-meter span.on {
-  background: #19e66b;
-  border-color: #63ff9b;
-  box-shadow:
-    0 0 4px rgba(25, 230, 107, 0.8),
-    inset 0 0 2px rgba(255, 255, 255, 0.6);
-}
-
-/* LED kuning */
-
-.meter span:nth-child(19).on,
-.meter span:nth-child(20).on,
-.meter span:nth-child(21).on,
-.meter span:nth-child(22).on,
-.meter span:nth-child(23).on,
-.meter span:nth-child(24).on,
-.level-meter span:nth-child(19).on,
-.level-meter span:nth-child(20).on,
-.level-meter span:nth-child(21).on,
-.level-meter span:nth-child(22).on,
-.level-meter span:nth-child(23).on,
-.level-meter span:nth-child(24).on,
-.led-meter span:nth-child(19).on,
-.led-meter span:nth-child(20).on,
-.led-meter span:nth-child(21).on,
-.led-meter span:nth-child(22).on,
-.led-meter span:nth-child(23).on,
-.led-meter span:nth-child(24).on {
-  background: #ffd21f;
-  border-color: #fff09a;
-  box-shadow:
-    0 0 4px rgba(255, 210, 31, 0.8),
-    inset 0 0 2px rgba(255, 255, 255, 0.6);
-}
-
-/* LED merah */
-
-.meter span:nth-child(n + 25).on,
-.level-meter span:nth-child(n + 25).on,
-.led-meter span:nth-child(n + 25).on {
-  background: #ff3030;
-  border-color: #ff8c8c;
-  box-shadow:
-    0 0 5px rgba(255, 48, 48, 0.9),
-    inset 0 0 2px rgba(255, 255, 255, 0.6);
+  justify-content: space-between;
+  font-size: 9px;
+  color: #64748b;
+  padding: 2px 4px;
 }
 
 /* =========================================================
-   AUDIO ENGINE
+   AUDIO ENGINE PANEL
 ========================================================= */
 
-.audio-engine,
-.audio-panel,
-.engine-panel,
-.audio-controls {
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-  margin: 10px 0 0;
-  padding: 10px;
+.audio-panel {
+  background: #1b2027;
   border: 1px solid #3a414b;
   border-radius: 8px;
-  background: #1b2027;
-  overflow: hidden;
+  padding: 12px;
+  margin-top: 14px;
 }
 
-.audio-engine h2,
-.audio-engine h3,
-.audio-panel h2,
-.audio-panel h3,
-.engine-panel h2,
-.engine-panel h3 {
-  margin: 0 0 8px;
-  font-size: 14px;
-  line-height: 1.2;
+.audio-panel h3 {
+  margin: 0 0 10px 0;
+  font-size: 12px;
+  color: #38bdf8;
 }
 
-.audio-engine .controls,
-.audio-panel .controls,
-.engine-panel .controls {
+.audio-actions {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
   gap: 8px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.input-device-panel {
   width: 100%;
-  min-width: 0;
-}
-
-.audio-engine button,
-.audio-panel button,
-.engine-panel button {
-  min-height: 34px;
-  padding: 6px 10px;
-  border: 1px solid #56616e;
+  background: #101216;
+  padding: 8px;
   border-radius: 6px;
-  background: #2c3540;
-  color: #ffffff;
-  font-size: 12px;
+  border: 1px solid #2a323d;
+  margin-bottom: 8px;
 }
 
-.audio-engine button:hover,
-.audio-panel button:hover,
-.engine-panel button:hover {
-  background: #3b4653;
+.input-device-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 8px;
 }
 
-/* =========================================================
-   RESPONSIVE TABLET
-========================================================= */
-
-@media (min-width: 768px) {
-  .channels,
-  .channel-list,
-  .channels-container {
-    gap: 16px;
-  }
-
-  .eq,
-  .equalizer,
-  .eq-bands {
-    grid-template-columns: repeat(31, 40px);
-    gap: 5px;
-  }
-
-  .band,
-  .eq-band,
-  .frequency-band {
-    width: 40px;
-    min-width: 40px;
-    height: 295px;
-    min-height: 295px;
-  }
-
-  .band input[type="range"],
-  .eq-band input[type="range"],
-  .fader-container input[type="range"],
-  .band-control input[type="range"] {
-    height: 215px;
-    min-height: 215px;
-  }
+.input-device-row select {
+  background: #1e293b;
+  color: #fff;
+  border: 1px solid #485260;
+  padding: 4px;
+  font-size: 11px;
+  border-radius: 4px;
+  width: 220px;
+  margin-top: 4px;
 }
 
-/* =========================================================
-   RESPONSIVE PONSEL
-========================================================= */
-
-@media (max-width: 767px) {
-  .eq-section,
-  .equalizer-section,
-  .eq-wrapper {
-    padding: 6px 2px 10px;
-  }
-
-  .eq,
-  .equalizer,
-  .eq-bands {
-    grid-template-columns: repeat(31, 38px);
-    gap: 3px;
-    padding: 3px;
-    margin-left: 0;
-    margin-right: 0;
-  }
-
-  .band,
-  .eq-band,
-  .frequency-band {
-    width: 38px;
-    min-width: 38px;
-    max-width: 38px;
-    height: 275px;
-    min-height: 275px;
-    padding: 4px 1px;
-  }
-
-  .band-frequency,
-  .frequency,
-  .freq-label {
-    font-size: 9px;
-  }
-
-  .band-title,
-  .band-number,
-  .channel-number,
-  .band-value,
-  .fader-value,
-  .value-label {
-    font-size: 9px;
-  }
-
-  .band input[type="range"],
-  .eq-band input[type="range"],
-  .fader-container input[type="range"],
-  .band-control input[type="range"] {
-    width: 17px;
-    min-width: 17px;
-    max-width: 17px;
-    height: 200px;
-    min-height: 200px;
-  }
-
-  .band input[type="range"]::-webkit-slider-thumb,
-  .eq-band input[type="range"]::-webkit-slider-thumb,
-  .fader-container input[type="range"]::-webkit-slider-thumb,
-  .band-control input[type="range"]::-webkit-slider-thumb {
-    width: 16px;
-    height: 16px;
-  }
-
-  .meter,
-  .level-meter,
-  .led-meter {
-    height: 142px;
-    min-height: 142px;
-    gap: 2px;
-  }
-
-  .meter span,
-  .level-meter span,
-  .led-meter span {
-    width: 5px;
-    height: 5px;
-    min-width: 5px;
-    min-height: 5px;
-  }
-
-  .audio-engine,
-  .audio-panel,
-  .engine-panel,
-  .audio-controls {
-    padding: 8px;
-    margin-top: 8px;
-  }
+.device-status,
+.feedback-status,
+.audio-status,
+.status {
+  font-size: 10px;
+  color: #94a3b8;
+  margin-top: 4px;
 }
 
-/* =========================================================
-   PONSEL KECIL
-========================================================= */
-
-@media (max-width: 380px) {
-  .eq,
-  .equalizer,
-  .eq-bands {
-    grid-template-columns: repeat(31, 36px);
-    gap: 2px;
-  }
-
-  .band,
-  .eq-band,
-  .frequency-band {
-    width: 36px;
-    min-width: 36px;
-    max-width: 36px;
-  }
-
-  .band-frequency,
-  .frequency,
-  .freq-label {
-    font-size: 8px;
-  }
-
-  .band input[type="range"],
-  .eq-band input[type="range"],
-  .fader-container input[type="range"],
-  .band-control input[type="range"] {
-    width: 16px;
-    min-width: 16px;
-    max-width: 16px;
-    height: 195px;
-    min-height: 195px;
-  }
+.audio-actions button,
+.file-button {
+  background: #252b35;
+  color: #fff;
+  border: 1px solid #485260;
+  padding: 6px 12px;
+  font-size: 11px;
+  border-radius: 4px;
+  font-weight: bold;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
 }
 
-/* =========================================================
-   MODE LANDSCAPE PONSEL
-========================================================= */
-
-@media (max-width: 900px) and (orientation: landscape) {
-  .eq-section,
-  .equalizer-section,
-  .eq-wrapper {
-    max-width: 100%;
-    overflow-x: auto;
-    overflow-y: hidden;
-  }
-
-  .eq,
-  .equalizer,
-  .eq-bands {
-    margin-left: 0;
-    margin-right: 0;
-  }
-
-  .audio-engine,
-  .audio-panel,
-  .engine-panel {
-    margin-top: 8px;
-  }
+.audio-actions button:hover,
+.file-button:hover {
+  background: #334155;
 }
 
-/* =========================================================
-   REDUCED MOTION
-========================================================= */
+.audio-actions button.active {
+  background: #10b981;
+  border-color: #34d399;
+  color: #000;
+}
 
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
+audio {
+  width: 100%;
+  height: 35px;
+  margin: 8px 0;
+}
+
+.output-panel {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  background: #101216;
+  padding: 8px;
+  border-radius: 6px;
+  margin-top: 8px;
+}
+
+.output-control label {
+  display: block;
+  font-size: 9px;
+  color: #94a3b8;
+  margin-bottom: 3px;
+}
+
+.output-control input[type="range"] {
+  width: 100%;
+  accent-color: #f59e0b;
+}
+
+.master-value {
+  font-size: 10px;
+  color: #f59e0b;
+  font-family: monospace;
+  text-align: center;
+}
+
+.output-control select {
+  width: 100%;
+  background: #1e293b;
+  color: #fff;
+  border: 1px solid #485260;
+  padding: 4px;
+  font-size: 11px;
+  border-radius: 4px;
+}
+
+#muteOutputButton.active {
+  background: #ef4444 !important;
+  color: #fff !important;
+  border-color: #f87171;
+}
+
+.footer {
+  text-align: center;
+  font-size: 10px;
+  color: #64748b;
+  margin-top: 15px;
+}
+
+@media (max-width: 768px) {
+  .control-row {
+    grid-template-columns: 1fr;
+  }
+  .output-panel {
+    grid-template-columns: 1fr;
   }
 }
-</style>
+  </style>
 </head>
 
 <body>
@@ -953,29 +718,30 @@ header h3,
         <h3>AUDIO ENGINE</h3>
 
         <div class="audio-actions">
-        <div class="input-device-panel">
-  <div class="input-device-row">
-    <div>
-      <label for="inputDeviceSelect">
-        INPUT DEVICE / MIXER FISIK
-      </label>
+          <div class="input-device-panel">
+            <div class="input-device-row">
+              <div>
+                <label for="inputDeviceSelect">
+                  INPUT DEVICE / MIXER FISIK
+                </label>
 
-      <select id="inputDeviceSelect">
-        <option value="">
-          Default microphone
-        </option>
-      </select>
-    </div>
+                <select id="inputDeviceSelect">
+                  <option value="">
+                    Default microphone
+                  </option>
+                </select>
+              </div>
 
-    <button id="refreshInputDevicesButton">
-      REFRESH
-    </button>
-  </div>
+              <button id="refreshInputDevicesButton">
+                REFRESH
+              </button>
+            </div>
 
-  <div id="inputDeviceStatus" class="device-status">
-    Perangkat input belum dipindai.
-  </div>
-</div>
+            <div id="inputDeviceStatus" class="device-status">
+              Perangkat input belum dipindai.
+            </div>
+          </div>
+          
           <button id="startMicButton">
             MIC INPUT
           </button>
@@ -1209,16 +975,16 @@ function updateMeter(channel) {
 
   meter.innerHTML = "";
 
-  for (let index = 0; index < 30; index++) {
+  for (let index = 0; index < 10; index++) {
     const segment = document.createElement("span");
 
-    if (index >= 25) {
+    if (index >= 7) {
       segment.classList.add("red");
-    } else if (index >= 19) {
+    } else if (index >= 5) {
       segment.classList.add("yellow");
     }
 
-    if (index >= 30 - level) {
+    if (index < level) {
       segment.classList.add("on");
     }
 
@@ -1245,7 +1011,6 @@ let masterGainNode = null;
 let outputMuteGainNode = null;
 
 let selectedInputDeviceId = "";
-let activeSourceType = "";
 let audioRunning = false;
 let audioGraphReady = false;
 let selectedAudioUrl = null;
@@ -1730,7 +1495,6 @@ function disconnectCurrentSource() {
 
   microphoneSource = null;
   audioRunning = false;
-  activeSourceType = "";
 }
 
 /* =========================================================
@@ -1752,7 +1516,6 @@ function connectAudioSource(source, sourceType) {
   }
 
   activeSource = source;
-  activeSourceType = sourceType;
 
   try {
     source.disconnect();
@@ -1793,6 +1556,7 @@ function connectAudioSource(source, sourceType) {
     " aktif. Audio melewati EQ Channel 1 dan Channel 2."
   );
 }
+
 /* =========================================================
    FILE AUDIO
 ========================================================= */
@@ -1882,10 +1646,6 @@ startAudioButton.addEventListener(
           );
       }
 
-      /*
-        Putuskan sumber audio sebelumnya.
-        Tidak perlu connect dua kali.
-      */
       disconnectCurrentSource();
 
       connectAudioSource(
@@ -1921,6 +1681,7 @@ startAudioButton.addEventListener(
     }
   }
 );
+
 /* =========================================================
    INPUT MICROPHONE
 ========================================================= */
@@ -2011,6 +1772,8 @@ stopAudioButton.addEventListener(
 
     disconnectCurrentSource();
 
+    startAudioButton.classList.remove("active");
+
     setAudioStatus(
       "Audio dihentikan. Input mikrofon dan file diputus."
     );
@@ -2098,6 +1861,12 @@ function startRealMeters() {
         ) {
           const segment =
             document.createElement("span");
+
+          if (segmentIndex >= 7) {
+            segment.classList.add("red");
+          } else if (segmentIndex >= 5) {
+            segment.classList.add("yellow");
+          }
 
           if (segmentIndex < level) {
             segment.classList.add("on");
@@ -2535,11 +2304,11 @@ document
       channel.querySelector(".range").value =
         "15";
 
+      setRange(channel, "15");
+
       channel
         .querySelectorAll(".band input")
         .forEach(slider => {
-          slider.min = "-15";
-          slider.max = "15";
           slider.value = "0";
           slider.disabled = false;
         });
@@ -2612,8 +2381,6 @@ if ("serviceWorker" in navigator) {
       });
   });
 }
-
-    
   </script>
 </body>
 </html>
