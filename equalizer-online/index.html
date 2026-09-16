@@ -1500,7 +1500,6 @@ function connectAudioSource(source, sourceType) {
   );
 }
 
-
 /* =========================================================
    FILE AUDIO
 ========================================================= */
@@ -1589,13 +1588,21 @@ startAudioButton.addEventListener(
             audioPlayer
           );
       }
+       disconnectCurrentSource();
 
+       connectAudioSource(
+       audioElementSource,
+         "File audio"
+   );
+      
       if (activeSource !== audioElementSource) {
-        connectAudioSource(
-          audioElementSource,
-          "File audio"
-        );
-      }
+  disconnectCurrentSource();
+
+  connectAudioSource(
+    audioElementSource,
+    "File audio"
+  );
+}
 
       await audioPlayer.play();
 
@@ -1618,7 +1625,6 @@ startAudioButton.addEventListener(
 /* =========================================================
    INPUT MICROPHONE
 ========================================================= */
-
 startMicButton.addEventListener(
   "click",
   async () => {
