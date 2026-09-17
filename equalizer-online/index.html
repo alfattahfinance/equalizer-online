@@ -198,6 +198,38 @@ header,
   margin-bottom: 8px;
 }
 
+.channel-title-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* LED Indikator Status Channel (Aktif, Bypass, Test) */
+.status-led {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #252b35;
+  border: 1px solid #485260;
+  box-shadow: inset 0 0 2px rgba(0,0,0,0.8);
+  display: inline-block;
+}
+.status-led.active-led {
+  background: #10b981;
+  border-color: #34d399;
+  box-shadow: 0 0 6px #10b981, inset 0 0 2px rgba(255,255,255,0.6);
+}
+.status-led.bypass-led {
+  background: #ef4444;
+  border-color: #f87171;
+  box-shadow: 0 0 6px #ef4444, inset 0 0 2px rgba(255,255,255,0.6);
+}
+.status-led.test-led {
+  background: #f59e0b;
+  border-color: #fbbf24;
+  box-shadow: 0 0 6px #f59e0b, inset 0 0 2px rgba(255,255,255,0.6);
+}
+
 .channel-title {
   font-size: 12px;
   font-weight: bold;
@@ -207,6 +239,7 @@ header,
 .channel-controls {
   display: flex;
   gap: 6px;
+  align-items: center;
 }
 
 .small-button {
@@ -216,6 +249,9 @@ header,
   padding: 3px 8px;
   font-size: 10px;
   border-radius: 3px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .small-button.active {
@@ -274,7 +310,7 @@ header,
 }
 
 /* =========================================================
-   METER AREA
+   METER AREA DENGAN LED HIDUP
 ========================================================= */
 
 .meter-area {
@@ -282,50 +318,77 @@ header,
   align-items: center;
   justify-content: space-between;
   background: #0d1015;
-  padding: 4px 8px;
+  padding: 6px 10px;
   border-radius: 4px;
   margin-bottom: 8px;
+  border: 1px solid #1e293b;
+}
+
+.meter-container-box {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex-grow: 1;
+  margin-right: 15px;
+}
+
+.meter-scale-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 7px;
+  color: #64748b;
+  font-family: monospace;
 }
 
 .meter {
   display: flex;
-  gap: 2px;
+  gap: 3px;
   height: 12px;
   align-items: center;
 }
 
 .meter span {
-  width: 6px;
+  flex: 1;
   height: 8px;
-  background: #252b35;
+  background: #192231;
   border-radius: 1px;
+  border: 1px solid #2a3441;
 }
 
-.meter span.on {
+/* LED Hidup (Menyala dengan warna presisi) */
+.meter span.green.on {
   background: #10b981;
+  border-color: #34d399;
+  box-shadow: 0 0 5px #10b981;
 }
 
 .meter span.yellow.on {
   background: #f59e0b;
+  border-color: #fbbf24;
+  box-shadow: 0 0 5px #f59e0b;
 }
 
 .meter span.red.on {
   background: #ef4444;
+  border-color: #f87171;
+  box-shadow: 0 0 6px #ef4444;
 }
 
 .clip {
   font-size: 9px;
   font-weight: bold;
-  color: #485260;
+  color: #64748b;
   background: #161a22;
-  padding: 2px 6px;
-  border-radius: 2px;
+  padding: 3px 8px;
+  border-radius: 3px;
+  border: 1px solid #2a3441;
 }
 
 .clip.on {
   background: #ef4444;
   color: #fff;
-  box-shadow: 0 0 6px #ef4444;
+  border-color: #f87171;
+  box-shadow: 0 0 8px #ef4444;
 }
 
 /* =========================================================
@@ -577,17 +640,21 @@ audio {
       </div>
 
       <section class="channels">
+        <!-- CHANNEL 1 -->
         <article class="channel" data-channel="0">
           <div class="channel-header">
-            <div class="channel-title">CHANNEL 1</div>
+            <div class="channel-title-group">
+              <span class="status-led active-led" id="ch0_active_led" title="Active LED"></span>
+              <div class="channel-title">CHANNEL 1</div>
+            </div>
 
             <div class="channel-controls">
               <button class="small-button bypass-button">
-                BYPASS
+                <span class="status-led bypass-led"></span> BYPASS
               </button>
 
               <button class="small-button test-button">
-                TEST
+                <span class="status-led test-led"></span> TEST
               </button>
             </div>
           </div>
@@ -630,7 +697,12 @@ audio {
           </div>
 
           <div class="meter-area">
-            <div class="meter"></div>
+            <div class="meter-container-box">
+              <div class="meter-scale-labels">
+                <span>-60</span><span>-40</span><span>-20</span><span>-10</span><span>-3</span><span>0</span><span>+3dB</span>
+              </div>
+              <div class="meter"></div>
+            </div>
             <div class="clip">CLIP</div>
           </div>
 
@@ -645,17 +717,21 @@ audio {
           </div>
         </article>
 
+        <!-- CHANNEL 2 -->
         <article class="channel" data-channel="1">
           <div class="channel-header">
-            <div class="channel-title">CHANNEL 2</div>
+            <div class="channel-title-group">
+              <span class="status-led active-led" id="ch1_active_led" title="Active LED"></span>
+              <div class="channel-title">CHANNEL 2</div>
+            </div>
 
             <div class="channel-controls">
               <button class="small-button bypass-button">
-                BYPASS
+                <span class="status-led bypass-led"></span> BYPASS
               </button>
 
               <button class="small-button test-button">
-                TEST
+                <span class="status-led test-led"></span> TEST
               </button>
             </div>
           </div>
@@ -698,7 +774,12 @@ audio {
           </div>
 
           <div class="meter-area">
-            <div class="meter"></div>
+            <div class="meter-container-box">
+              <div class="meter-scale-labels">
+                <span>-60</span><span>-40</span><span>-20</span><span>-10</span><span>-3</span><span>0</span><span>+3dB</span>
+              </div>
+              <div class="meter"></div>
+            </div>
             <div class="clip">CLIP</div>
           </div>
 
@@ -939,7 +1020,7 @@ function createBands(channel) {
 }
 
 /* =========================================================
-   METER CADANGAN
+   METER LED HIDUP (REAL-TIME & FALLBACK)
 ========================================================= */
 
 function updateMeter(channel) {
@@ -969,19 +1050,21 @@ function updateMeter(channel) {
     : 0;
 
   const level = Math.min(
-    10,
-    Math.round((maximum + Math.abs(gain)) / 3)
+    12,
+    Math.max(1, Math.round(((maximum + Math.abs(gain)) / 30) * 12))
   );
 
   meter.innerHTML = "";
 
-  for (let index = 0; index < 10; index++) {
+  for (let index = 0; index < 12; index++) {
     const segment = document.createElement("span");
 
-    if (index >= 7) {
+    if (index >= 9) {
       segment.classList.add("red");
-    } else if (index >= 5) {
+    } else if (index >= 7) {
       segment.classList.add("yellow");
+    } else {
+      segment.classList.add("green");
     }
 
     if (index < level) {
@@ -991,7 +1074,7 @@ function updateMeter(channel) {
     meter.appendChild(segment);
   }
 
-  clip.classList.toggle("on", level >= 10);
+  clip.classList.toggle("on", level >= 12);
 }
 
 /* =========================================================
@@ -1785,7 +1868,7 @@ stopAudioButton.addEventListener(
 );
 
 /* =========================================================
-   METER AUDIO NYATA
+   METER LED HIDUP REAL-TIME (ANALYZER)
 ========================================================= */
 
 function startRealMeters() {
@@ -1847,8 +1930,8 @@ function startRealMeters() {
         const level = Math.max(
           0,
           Math.min(
-            10,
-            Math.round(((db + 60) / 60) * 10)
+            12,
+            Math.round(((db + 60) / 60) * 12)
           )
         );
 
@@ -1856,16 +1939,18 @@ function startRealMeters() {
 
         for (
           let segmentIndex = 0;
-          segmentIndex < 10;
+          segmentIndex < 12;
           segmentIndex++
         ) {
           const segment =
             document.createElement("span");
 
-          if (segmentIndex >= 7) {
+          if (segmentIndex >= 9) {
             segment.classList.add("red");
-          } else if (segmentIndex >= 5) {
+          } else if (segmentIndex >= 7) {
             segment.classList.add("yellow");
+          } else {
+            segment.classList.add("green");
           }
 
           if (segmentIndex < level) {
@@ -2064,10 +2149,10 @@ function setPreset(type) {
 }
 
 /* =========================================================
-   KONTROL CHANNEL
+   KONTROL CHANNEL (LED INTERAKTIF)
 ========================================================= */
 
-channels.forEach(channel => {
+channels.forEach((channel, channelIndex) => {
   createBands(channel);
 
   channel
@@ -2085,62 +2170,58 @@ channels.forEach(channel => {
       );
     });
 
-  channel
-    .querySelector(".bypass-button")
-    .addEventListener("click", event => {
-      const button = event.currentTarget;
+  const bypassBtn = channel.querySelector(".bypass-button");
+  const testBtn = channel.querySelector(".test-button");
+  const activeLed = document.getElementById(`ch${channelIndex}_active_led`);
 
-      button.classList.toggle("active");
+  bypassBtn.addEventListener("click", event => {
+    const button = event.currentTarget;
+    button.classList.toggle("active");
+    const bypassed = button.classList.contains("active");
 
-      const bypassed =
-        button.classList.contains("active");
+    channel
+      .querySelectorAll(
+        ".gain, .hpf, .range, .band input"
+      )
+      .forEach(control => {
+        control.disabled = bypassed;
+      });
 
-      channel
-        .querySelectorAll(
-          ".gain, .hpf, .range, .band input"
-        )
-        .forEach(control => {
-          control.disabled = bypassed;
-        });
+    button.disabled = false;
+    syncAudioControlsFromUI();
 
-      button.disabled = false;
+    // Ubah status LED Active & Bypass menyala/mati
+    if (bypassed) {
+      activeLed.classList.remove("active-led");
+      setStatus("Bypass channel aktif.");
+    } else {
+      activeLed.classList.add("active-led");
+      setStatus("Bypass channel nonaktif.");
+    }
+  });
 
-      syncAudioControlsFromUI();
+  testBtn.addEventListener("click", event => {
+    const button = event.currentTarget;
+    button.classList.toggle("active");
+    const testing = button.classList.contains("active");
 
-      setStatus(
-        bypassed
-          ? "Bypass channel aktif."
-          : "Bypass channel nonaktif."
-      );
-    });
+    channel.querySelector(".gain").value =
+      testing ? "6" : "0";
 
-  channel
-    .querySelector(".test-button")
-    .addEventListener("click", event => {
-      const button = event.currentTarget;
+    channel
+      .querySelectorAll(".band input")
+      .forEach(slider => {
+        slider.value = testing ? "2" : "0";
+      });
 
-      button.classList.toggle("active");
+    updateValues(channel);
 
-      const testing =
-        button.classList.contains("active");
-
-      channel.querySelector(".gain").value =
-        testing ? "6" : "0";
-
-      channel
-        .querySelectorAll(".band input")
-        .forEach(slider => {
-          slider.value = testing ? "2" : "0";
-        });
-
-      updateValues(channel);
-
-      setStatus(
-        testing
-          ? "Test signal UI aktif."
-          : "Test signal UI nonaktif."
-      );
-    });
+    setStatus(
+      testing
+        ? "Test signal UI aktif."
+        : "Test signal UI nonaktif."
+    );
+  });
 
   updateValues(channel);
 });
@@ -2259,6 +2340,13 @@ document
           bypassed
         );
 
+        const activeLed = document.getElementById(`ch${index}_active_led`);
+        if (bypassed) {
+          activeLed.classList.remove("active-led");
+        } else {
+          activeLed.classList.add("active-led");
+        }
+
         channel
           .querySelectorAll(
             ".gain, .hpf, .range, .band input"
@@ -2294,7 +2382,7 @@ document
 document
   .getElementById("resetButton")
   .addEventListener("click", () => {
-    channels.forEach(channel => {
+    channels.forEach((channel, index) => {
       channel.querySelector(".gain").value =
         "0";
 
@@ -2320,6 +2408,9 @@ document
       channel
         .querySelector(".test-button")
         .classList.remove("active");
+
+      const activeLed = document.getElementById(`ch${index}_active_led`);
+      activeLed.classList.add("active-led");
 
       channel
         .querySelectorAll(".gain, .hpf, .range")
