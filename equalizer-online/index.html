@@ -1581,8 +1581,9 @@ function disconnectCurrentSource() {
 }
 
 /* =========================================================
-   HUBUNGKAN SOURCE KE EQ
+   PERBAIKAN ROUTING AUDIO KE CHANNEL 1 & 2
 ========================================================= */
+
 function connectAudioSource(source, sourceType) {
   initializeAudioGraph();
 
@@ -1606,37 +1607,26 @@ function connectAudioSource(source, sourceType) {
     // Source mungkin belum pernah tersambung.
   }
 
-  source.connect(splitterNode);
-
-  const channelCount = source.channelCount || 1;
-
-  if (channelCount <= 1) {
-    splitterNode.connect(
-      audioChannels[0].inputGain,
-      0
-    );
-
-    splitterNode.connect(
-      audioChannels[1].inputGain,
-      0
-    );
-  } else {
-    splitterNode.connect(
-      audioChannels[0].inputGain,
-      0
-    );
-
-    splitterNode.connect(
-      audioChannels[1].inputGain,
-      1
-    );
+  /* 
+    Pastikan sumber audio (baik file mono/stereo maupun mic) 
+    diteruskan ke KEDUA channel equalizer secara paralel 
+    agar meter Channel 1 dan Channel 2 sama-sama hidup.
+  */
+  try {
+    source.connect(audioChannels[0].inputGain);
+    source.connect(audioChannels[1].inputGain);
+  } catch (err) {
+    // Fallback jika menggunakan splitter node
+    source.connect(splitterNode);
+    splitterNode.connect(audioChannels[0].inputGain, 0);
+    splitterNode.connect(audioChannels[1].inputGain, 0);
   }
 
   audioRunning = true;
 
   setAudioStatus(
     sourceType +
-    " aktif. Audio melewati EQ Channel 1 dan Channel 2."
+    " aktif. Channel 1 & Channel 2 aktif memproses audio."
   );
 }
 
